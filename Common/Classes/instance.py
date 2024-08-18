@@ -2,13 +2,10 @@ from datetime import date, datetime
 
 from Common.Classes.processes import ProcessController
 from Common.Classes.threads import ThreadController
-from API.SocketExample.sql import SettingsController
 
 import logger
 
 class Instance():
-    settings_controller : SettingsController = SettingsController()
-
     process_controller : ProcessController = ProcessController()
 
     thread_controller : ThreadController = ThreadController()
