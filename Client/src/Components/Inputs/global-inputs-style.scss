@@ -1,0 +1,23 @@
+.input-field {
+    padding: 5px;
+    font-size: 18px;
+    background: #d2d2d2;
+    color: black;
+    padding: 5px 5px;
+    outline: none;
+    border: 0;
+    width: 100%;
+    border-radius: 3px;
+    padding: 5px 10px;
+    border: 1px solid black;
+    box-sizing: border-box;
+}
+
+.input-field:active {
+    border-style: none;
+    border-style: outset;
+}
+
+.input-field:disabled {
+    color: grey;
+}

@@ -1,0 +1,152 @@
+:root {
+    --text: #eee;
+    --error-text: #ff7474;
+    --warning-text: #d#e6e5f7
+  }
+
+.App {
+    text-align: center;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    color: #b7b7b7;
+}
+
+.header-container {
+    background-color: #102D55;
+    height: 7vh;
+    z-index: 1;
+    display: flex;
+    flex-direction: row;
+    padding: 20px;
+}
+.header {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    justify-content: center;
+    padding-left: 1em;
+    user-select: none;
+    color: white;
+    cursor: pointer;
+}
+.headerTitle {
+    font-size: 36px;
+}
+.headerVersion {
+    font-size: 16px;
+}
+
+.content {
+    background-color: Black;
+    display: flex;
+    flex-direction: row;
+}
+
+.footer {
+    background-color: #0b182b;
+    height: 3vh;
+}
+
+.dashboard-toolbar {
+    width: 100%;
+    z-index: 1;
+    height: 3vh;
+    display: flex;
+    justify-content: space-between;
+    -webkit-box-shadow: 0px 0px 15px -6px #000000; 
+    box-shadow: 0px 0px 15px -6px #000000;
+
+    .button {
+        border: 0;
+        border-left: 1px grey solid;
+        border-radius: 0;
+        width: 3em;
+        background-color: transparent;
+        padding: 13px;
+
+        &:hover {
+            color: gray !important;
+            background-color: transparent;
+        }
+
+        &:active {
+            color: white !important;
+            background-color: transparent;
+        }
+    }
+
+    .dashboard-buttons {
+        display: flex;
+        justify-content: right;
+    }
+
+    .dashboard-mode {
+        background-color: rgba(255, 255, 255, 0.21);
+        justify-content: left;
+    }
+}
+
+.dashboard-content {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    border-top: 5px solid #466896;
+    justify-content: center;
+    align-items: center;
+    
+    .watermark-container {
+        display: flex;
+        height: 200px;
+        opacity: 5%;
+        position: fixed;
+        justify-content: center;
+        z-index: 0;
+
+        .watermark-title {
+            font-size: 5em;
+        }
+        .watermark-version {
+            font-size: 2em;
+        }
+    }
+}
+
+.error {
+    color: var(--error-text);
+}
+
+.warning {
+    color: var(--warning-text);
+}
+.user-input {
+    color: #9f9cfe;
+}
+
+.dashboard-container {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.main-container {
+    display: flex;
+    flex-direction: column;
+    width: 100vw;
+    height: 100vh;
+    background: black; // Projector will require solid black to avoid all light being produced
+
+    .dashboard-content-parent {
+        height: 100%;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-content: center;
+        align-items: center;
+    }
+}
