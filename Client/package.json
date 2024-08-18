@@ -8,9 +8,10 @@
     "homepage": "./",
     "scripts": {
         "start": "concurrently -k \"npm run client:start\" \"npm run electron:start\"",
-        "client:start": "react-scripts start",
+        
+        "client:start": "set PORT=8080 && react-scripts start",
         "electron:start": "wait-on tcp:127.0.0.1:8080 && electron .",
-        "dev:start": "react-scripts start",
+
         "package": "electron-forge package",
         "make": "electron-forge make",
         "publish": "electron-forge publish",
