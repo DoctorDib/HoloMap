@@ -48,3 +48,11 @@ Theses are a list of features which would be cool to have:
 
 - Octopus Energy
   - Using their API I could make something that integrates features to notifiy of electric usage?
+
+## Requirements
+
+- Python 3
+- Node
+- C++
+- Build tools:
+  - winget install --id Microsoft.VisualStudio.2022.BuildTools --override "--passive --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64"
