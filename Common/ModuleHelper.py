@@ -4,6 +4,7 @@ from multiprocessing import Event, Process, Queue, shared_memory
 from flask import Flask
 
 from Common.ModulesHandler import Modules_MultiProcess
+from config import Config
 import logger
 
 class ModuleHelper(Process):
@@ -25,12 +26,14 @@ class ModuleHelper(Process):
         self.parent_memory = None
         self.app = app
 
+        self.config = Config()
+
         self.output = output
 
         # Setting up modules
         if (has_modules):            
             # Memory that it will send to their own processes list
-            self.memory = shared_memory.SharedMemory(create=True, size=1920*1080*3)
+            self.memory = shared_memory.SharedMemory(create=True, size=self.config.get_int('RESOLUTION_WIDTH')*self.config.get_int('RESOLUTION_HEIGHT')*self.config.get_int('RESOLUTION_CHANELS'))
             # Setting up the multi process modules helper
             self.modules = Modules_MultiProcess(module_directory, module_str)
             # Initialises all of the modules
@@ -38,7 +41,7 @@ class ModuleHelper(Process):
 
         # The data input
         if (parent_memory_name is not None):
-            self.parent_memory = shared_memory.SharedMemory(name=parent_memory_name, size=1920*1080*3)
+            self.parent_memory = shared_memory.SharedMemory(name=parent_memory_name, size=self.config.get_int('RESOLUTION_WIDTH')*self.config.get_int('RESOLUTION_HEIGHT')*self.config.get_int('RESOLUTION_CHANELS'))
 
     @abstractmethod
     def prep(self):

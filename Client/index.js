@@ -4,6 +4,8 @@
 const { app, BrowserWindow } = require('electron');
 const path = require('node:path');
 
+require('dotenv').config({ path: path.join(__dirname, '../.env') });
+
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
   app.quit();
@@ -23,8 +25,8 @@ const createWindow = () => {
     // Maximising window
     mainWindow.maximize();
 
-    mainWindow.loadURL('http://localhost:8080');
-
+    // Load the determined URL
+    mainWindow.loadURL(`${process.env.INTERNET_PROTOCOL}://${process.env.ADDRESS}:${process.env.PORT}${process.env.ADDITIONAL_PATH}`);
     // Open the DevTools.
     mainWindow.webContents.openDevTools();
 };

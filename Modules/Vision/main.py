@@ -12,7 +12,6 @@ from Modules.Vision.BoundaryBox import BoundaryBox
 class Vision_Module(ModuleHelper):
     def __init__(self, memory_name: str = None, memory_size: int = 1920 * 1080 * 3,
                 app: Flask = None, output: Queue = None):
-        self.prep()
 
         self.base_folder_path = os.path.dirname(os.path.abspath(__file__)) + "\\Modules"
         
@@ -26,11 +25,14 @@ class Vision_Module(ModuleHelper):
         self.memory_size = memory_size
 
     def prep(self):
-        self.detector = cv2.VideoCapture(2, cv2.CAP_DSHOW)  # this is the magic!
+        if (self.config == None):
+            return
 
-        self.detector.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
-        self.detector.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
-        self.detector.set(cv2.CAP_PROP_FPS, 30)
+        self.detector = cv2.VideoCapture(self.config.get_int("CAMERA_SOURCE"), cv2.CAP_DSHOW)  # this is the magic!
+
+        self.detector.set(cv2.CAP_PROP_FRAME_WIDTH, self.config.get_int("RESOLUTION_WIDTH"))
+        self.detector.set(cv2.CAP_PROP_FRAME_HEIGHT, self.config.get_int("RESOLUTION_HEIGHT"))
+        self.detector.set(cv2.CAP_PROP_FPS, self.config.get_int("FPS"))
         self.detector.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'))
 
     def run(self):
@@ -53,7 +55,7 @@ class Vision_Module(ModuleHelper):
 
                 if img is not None:
                     cv2.imshow("Result", img)
-                cv2.waitKey(1)
+                cv2.waitKey(1)  
         except Exception as e:
             print(e)
         finally:
@@ -64,7 +66,14 @@ class Vision_Module(ModuleHelper):
     def camera_stuff(self):
         if self.detector is None:
             return None
+        
         succeed, img = self.detector.read()
+
+        # Flipping camera to specified configuration
+        flip_value = self.config.get_int('FLIP_CAMERA')
+        if (flip_value > -2 and flip_value <= 1):
+            img = cv2.flip(img, flip_value)
+
         return img if succeed else None
 
     def send_img_via_shared_memory(self, img):
@@ -72,7 +81,7 @@ class Vision_Module(ModuleHelper):
         flat_img = img.flatten()
 
         # Create a NumPy array that maps to the shared memory buffer
-        shm_array = np.ndarray((1080, 1920, 3), dtype=np.uint8, buffer=self.memory.buf)
+        shm_array = np.ndarray((self.config.get_int('RESOLUTION_HEIGHT'), self.config.get_int('RESOLUTION_WIDTH'), self.config.get_int('RESOLUTION_CHANELS')), dtype=np.uint8, buffer=self.memory.buf)
 
         # Copy the image data to the shared memory buffer
         np.copyto(shm_array, img)

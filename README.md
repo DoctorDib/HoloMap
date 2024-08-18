@@ -49,6 +49,37 @@ Theses are a list of features which would be cool to have:
 - Octopus Energy
   - Using their API I could make something that integrates features to notifiy of electric usage?
 
+## .env Data
+The structure of this data should always match the .env file
+
+```
+# NOTE:
+# Make sure my structure matches the readme
+
+#######
+# URL #
+#######
+INTERNET_PROTOCOL=http
+ADDRESS=localhost
+PORT=8080
+ # / or /Sandbox
+ADDITIONAL_PATH=/
+
+##########
+# VISION #
+##########
+CAMERA_SOURCE=0
+RESOLUTION_WIDTH=1920
+RESOLUTION_HEIGHT=1080
+RESOLUTION_CHANELS=3
+FPS=30
+# Disabled = -2 (this is custom)
+# Vertical and Horizontal = -1
+# Vertical = 0
+# Horizontal = 1
+FLIP_CAMERA=-2
+```
+
 ## Requirements
 
 - Python 3

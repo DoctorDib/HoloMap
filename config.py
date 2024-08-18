@@ -1,4 +1,6 @@
-import os, sys, inspect
+import logging
+import os, inspect
+from dotenv import load_dotenv
 
 MAIN_PATH = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 
@@ -16,7 +18,12 @@ class DirectoryInfo:
     def full_path(self):
         return "{0}/{1}".format(self.directory, self.file_name)
 
-class Config:
+class Config():
+
+    def __init__(self):
+        self.cached_data = {}
+        load_dotenv()
+
     # Logs
     MaxLogs = 500
     LogLocation = DirectoryInfo('Data', 'logs.json')
@@ -29,3 +36,27 @@ class Config:
     DEVDBName="HANA_storage_DEV.db"
 
     MainDir = os.path.dirname(os.path.abspath(os.path.dirname(__file__)))
+
+    def get_int(self, key):
+        try:
+            if (key in self.cached_data):
+                return self.cached_data[key]
+            else:
+                print("attempign to get ", key)
+                new_data = int(os.getenv(key))
+                self.cached_data.update({key: new_data})
+                return new_data
+        except Exception as e:
+            logging.exception(e)
+    
+    def get_str(self, key):
+        try:
+            if (key in self.cached_data):
+                return self.cached_data[key]
+            else:
+                print("attempign to get ", key)
+                new_data = str(os.getenv(key))
+                self.cached_data.update({key: new_data})
+                return new_data
+        except Exception as e:
+            logging.exception(e)
