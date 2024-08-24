@@ -8,29 +8,29 @@ import eventlet
 import eventlet.wsgi
 
 # COMMON
+from Common.Classes.instance import Instance
 from Common.ModulesHandler import Modules_MultiProcess
-
 # PAGE IMPORTS
-# from API.Settings.routes import settings_routes_app, settings_get
-
+from API.Settings.routes import settings_routes_app, settings_get
 # Sockets
 from API.socket import SocketIOHandler
 
 dev_mode = len(sys.argv) > 1 and sys.argv[1] == "DEV"
+MainInstance : Instance = None
 
 def create_flask_app():
     app = Flask(__name__)
     
     # Initiating routes
-    # app.register_blueprint(settings_routes_app)
+    app.register_blueprint(settings_routes_app)
 
     CORS(app)
 
-    # @app.route("/initialise", methods=['POST'])
-    # def initialise():
-    #     return {
-    #         "settings": settings_get(),
-    #     }
+    @app.route("/initialise", methods=['POST'])
+    def initialise():
+        return {
+            "settings": settings_get(),
+        }
 
     return app
 
@@ -38,17 +38,19 @@ def run_server():
     monkey.patch_all()
 
     try:
-        base_folder_path = os.path.dirname(os.path.abspath(__file__)) + "/Modules"
+        # Prepping database
+        MainInstance = Instance()
+        MainInstance.initialise()
 
         app = create_flask_app()
 
         output = Queue(maxsize=30)
 
         socketio_handler = SocketIOHandler()
-
         socketio_handler.start_server(app)
         socketio_handler.start_queue_processor(output)
 
+        base_folder_path = os.path.dirname(os.path.abspath(__file__)) + "/Modules"
         modules = Modules_MultiProcess(base_folder_path, "Modules.{0}.main.{0}_Module")
         modules.initialise(None, output=output)
 

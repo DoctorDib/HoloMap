@@ -15,7 +15,7 @@ export const sendData = async (url: string, bodyData: object = {}): Promise<stri
     };
 
     return axios(options)
-        .then((response: any) => response.data) //inspectObjectArray(true, response.data))
+        .then((response: any) => response.data)
         .catch((error: AxiosError) => {
             console.log('Axios Error search Peanut:', error);
         });

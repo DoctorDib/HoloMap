@@ -12,19 +12,22 @@ class Types(IntEnum):
     DICT=4
 
 class SettingsField(BaseSQLInterface):
-    owner_id_aesn : str = ""
     key : str = ''
-    value_base64 : str = ''
+    value_obj : any = {}
     type : Types = Types.STRING # default to string
+
+    def __init__(self, key = '', value = {}, type = Types.STRING):
+        self.key = key
+        self.value_obj = value
+        self.type = type
 
 class Settings(BaseSQLInterface):
     _table = "settings"
     _columns = {
-        "owner_id_aesn": "TEXT",
         "key": "TEXT",
-        "value_base64": "TEXT",
+        "value_obj": "TEXT",
         "type": "INTEGER",
-        "UNIQUE_CONSTRAINT": "UNIQUE(owner_id_aesn, key)",
+        "UNIQUE_CONSTRAINT": "UNIQUE(key)",
     }
 
     fields : list[SettingsField] = []
@@ -46,11 +49,11 @@ class Settings(BaseSQLInterface):
 
         settings_fields : list[SettingsField] = []
         type_identifier = SettingsKeyValueTypes()
-        
+
         for key in fields:
             new_field = SettingsField()
             new_field.key = key
-            new_field.value_base64 = fields[key]
+            new_field.value_obj = fields[key]
             new_field.type = type_identifier[key]
             settings_fields.append(new_field)
 
@@ -61,7 +64,7 @@ class Settings(BaseSQLInterface):
 
         for field in self.fields:
             json_field = field.to_json()
-            new_fields[json_field['key']] = self.format(json_field['value_base64'], json_field['type'])
+            new_fields[json_field['key']] = self.format(json_field['value_obj'], json_field['type'])
 
         return new_fields
 
@@ -101,15 +104,5 @@ class SettingsKeyValueTypes():
     def __getitem__(self, name):
         return getattr(self, name)
 
-    # Settings form values
-    time_interval_logger : Types = Types.INT
-    time_interval_ping : Types = Types.INT
-    def_pos_x : Types = Types.INT
-    def_pos_y : Types = Types.INT
-    def_size_width : Types = Types.INT
-    def_size_height : Types = Types.INT
-    drag_steps : Types = Types.INT
-    resize_steps : Types = Types.INT
-
     # Hidden values
-    tab_order : Types = Types.ARRAY
+    layers : Types = Types.DICT

@@ -5,8 +5,6 @@ from collections.abc import MutableSequence, MutableMapping
 
 from Common.helper import format_type, serialise, deserialise
 
-import logger
-
 class BaseSQLInterface(ABC):
     __sql_class_type__ = True
 
@@ -69,15 +67,15 @@ class BaseSQLInterface(ABC):
                     continue
 
                 value = values[index]
-                if ("_base64" in key):
-                    value = deserialise(value)
+                if ("_obj" in key):
+                    value = deserialise(value)    
                 else:
                     value = get_type_hints(self)[key](value)
-                    
+                
                 setattr(self, key, value)
         except Exception as e:
             print("error")
-            logger.exception(e)
+            print(e)
     
     def get_active_data_keys(self):
         keys = []
@@ -97,7 +95,8 @@ class BaseSQLInterface(ABC):
 
         for key in keys:
             key_list.append(key)
-            if ("_base64" in key):
+            
+            if ("_obj" in key):
                 value = format_type(serialise(getattr(self, key)))
             else:
                 value = format_type(getattr(self, key))

@@ -3,6 +3,7 @@ from time import sleep
 from flask import Flask
 
 import os, cv2
+import logger
 import numpy as np
 
 # from qreader import QReader
@@ -39,7 +40,7 @@ class QR_Module(ModuleHelper):
             raise ValueError("Buffer size is too small for the image. Ensure the shared memory size is correct.")
 
         self.frame = np.ndarray((1080, 1920, 3), dtype=np.uint8, buffer=self.parent_memory.buf)
-        print(f"Frame shape: {self.frame.shape}")
+        logger.info(f"Attempting to set up Camera")
         
         return self.frame
     

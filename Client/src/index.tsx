@@ -10,7 +10,7 @@ import Config from './Common/Config';
 
 ReactDOM.createRoot(document.getElementById('header-root')).render(
     <>
-        <title> CAHSI - v{ Config.version } </title>
+        <title> HANA - v{ Config.version } </title>
         <meta name="description" content={'CAHSI - v' + Config.version} />
     </>,
 );

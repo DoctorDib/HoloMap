@@ -1,5 +1,6 @@
 from datetime import date, datetime
 
+from API.Settings.sql import SettingsController
 from Common.Classes.processes import ProcessController
 from Common.Classes.threads import ThreadController
 
@@ -7,6 +8,7 @@ import logger
 
 class Instance():
     process_controller : ProcessController = ProcessController()
+    settings_controller : SettingsController = SettingsController()
 
     thread_controller : ThreadController = ThreadController()
     init_time : datetime = datetime.now()

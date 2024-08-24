@@ -6,6 +6,9 @@ def serialise(obj : any):
     return codecs.decode(codecs.encode(pickle.dumps(obj), "base64"), 'UTF-8').replace('\n', '')
 
 def deserialise(obj : str):
+    if (isinstance(obj, dict)):
+        return obj
+
     return pickle.loads(codecs.decode(codecs.encode(obj, 'UTF-8'), 'base64'))
 
 def format_type(input : any):
