@@ -41,8 +41,11 @@ export const initialiseDataRequest = async (): Promise<any> => {
 
     const newData: any = {
         type: DataActionEnum.LOAD_SUCCESS,
+
         logs: data.logs,
         settings: data.settings,
+        calibrations: data.calibrations,
+        
         isError: false,
     };
 

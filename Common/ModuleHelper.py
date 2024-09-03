@@ -1,5 +1,6 @@
 from abc import abstractmethod
 from multiprocessing import Event, Process, Queue, shared_memory
+import multiprocessing
 
 from flask import Flask
 
@@ -8,7 +9,8 @@ from config import Config
 import logger
 
 class ModuleHelper(Process):
-    def __init__(self, name: str, has_modules: bool = False, module_directory: str = None, module_str: str = None, parent_memory_name: str = None, app: Flask = None, output: Queue = None):
+    def __init__(self, name: str, has_modules: bool = False, module_directory: str = None, module_str: str = None, parent_memory_name: str = None, 
+                 app: Flask = None, output: Queue = None, shared_state: multiprocessing.managers.SyncManager.dict = None):
         super().__init__()
 
         logger.info(f"Starting up {name} Process")
@@ -29,6 +31,7 @@ class ModuleHelper(Process):
         self.config = Config()
 
         self.output = output
+        self.shared_state = shared_state
 
         # Setting up modules
         if (has_modules):            
@@ -37,7 +40,7 @@ class ModuleHelper(Process):
             # Setting up the multi process modules helper
             self.modules = Modules_MultiProcess(module_directory, module_str)
             # Initialises all of the modules
-            self.modules.initialise(self.memory.name, app=app, output=output)
+            self.modules.initialise(self.memory.name, app=app, output=output, shared_state=shared_state)
 
         # The data input
         if (parent_memory_name is not None):

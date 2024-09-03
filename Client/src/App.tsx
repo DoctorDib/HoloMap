@@ -7,7 +7,7 @@ import Dashboard from './Pages/Dashboard';
 import NotFound from './Pages/NotFound';
 import DataHandlerComponent from './Components/DataHandler';
 import Sandbox from './Pages/Sandbox';
-import { initialiseDataRequest } from './DataHandler/Actions/rootActions';
+import { initialiseDataRequest } from './DataHandler/Root/Actions';
 
 const App = (): React.ReactElement => {
     const dataHandlerRef = useRef(null);

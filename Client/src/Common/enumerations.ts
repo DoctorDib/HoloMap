@@ -42,6 +42,19 @@ const DataActionEnum = {
     // QR
     QR_SetDetectionList: 40,
     QR_EmptyDetectionList: 41,
+
+    // Calbration
+    Webcam_SetEdit: 51,
+    Webcam_SetBoundary: 52,
+    Webcam_GetCalibration: 53,
+    
+    Projector_SetEdit: 54,
+    Projector_SetBoundary: 55,
+    Projector_GetCalibration: 56,
+
+    GetCalibrations: 57,
+    NextCalibrationPoint: 58,
+    CompleteCalibration: 59,
 };
 
 const NotificationActionEnums = {

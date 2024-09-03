@@ -1,4 +1,5 @@
 from multiprocessing import Queue
+import multiprocessing
 import os
 import cv2
 from flask import Flask
@@ -11,11 +12,11 @@ from Modules.Vision.BoundaryBox import BoundaryBox
 
 class Vision_Module(ModuleHelper):
     def __init__(self, memory_name: str = None, memory_size: int = 1920 * 1080 * 3,
-                app: Flask = None, output: Queue = None):
+                app: Flask = None, output: Queue = None, shared_state: multiprocessing.managers.SyncManager.dict = None):
 
         self.base_folder_path = os.path.dirname(os.path.abspath(__file__)) + "\\Modules"
         
-        super().__init__("Vision", True, self.base_folder_path, "Modules.Vision.Modules.{0}.main.{0}_Module", app=app, output=output)
+        super().__init__("Vision", True, self.base_folder_path, "Modules.Vision.Modules.{0}.main.{0}_Module", app=app, output=output, shared_state=shared_state)
 
         # Setting up the boundary
         self.cursor_boundary = BoundaryBox(top_left=(0, 0), top_right=(1920, 0), bottom_right=(1920, 1080), bottom_left=(0, 1080))
@@ -35,6 +36,14 @@ class Vision_Module(ModuleHelper):
         self.detector.set(cv2.CAP_PROP_FPS, self.config.get_int("FPS"))
         self.detector.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'))
 
+        # Screen friendly
+        self.detector.set(cv2.CAP_PROP_AUTO_WB, 0)  # Disable auto white balance
+        self.detector.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.4)  # Disable auto exposure (0.25 is manual mode, 0.75 is auto)
+
+        # Manually set exposure and white balance if needed
+        #self.detector.set(cv2.CAP_PROP_EXPOSURE, -5)  # Adjust this value as needed
+        #self.detector.set(cv2.CAP_PROP_WB_TEMPERATURE, 4500)  # Adjust this value as needed
+
     def run(self):
         if self.detector is None:
             self.prep()
@@ -53,9 +62,9 @@ class Vision_Module(ModuleHelper):
                         print("Uhh Ohh", e)
                         pass
 
-                if img is not None:
+                if img is not None and self.shared_state['debug_mode']:
                     cv2.imshow("Result", img)
-                cv2.waitKey(1)  
+                    cv2.waitKey(1)  
         except Exception as e:
             print(e)
         finally:

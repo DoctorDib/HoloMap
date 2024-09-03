@@ -150,3 +150,28 @@
         align-items: center;
     }
 }
+
+.sandbox {
+    background: black;
+    height: 100vh;
+    width: 100vw;
+
+    .project-stamp {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        opacity: .1;
+        width: 300px;
+        height: 400px;
+
+        .logo {
+            width: 75%;
+            height: 75;
+        }
+
+        .text {
+            font-size: 25px;
+        }
+    }
+}

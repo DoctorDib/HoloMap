@@ -1,5 +1,6 @@
 import importlib.util
 import multiprocessing
+import multiprocessing.managers
 import multiprocessing.shared_memory
 import os
 
@@ -17,7 +18,8 @@ class Modules_MultiProcess():
         self.base_folder_path = base_folder_path
         self.class_path_pattern = class_path_pattern
 
-    def initialise(self, memory_name: str, memory_size: int = 1920 * 1080 * 3, app: Flask = None, output: multiprocessing.Queue = None):
+    def initialise(self, memory_name: str, memory_size: int = 1920 * 1080 * 3, app: Flask = None, 
+                   output: multiprocessing.Queue = None, shared_state: multiprocessing.managers.SyncManager.dict = None):
         # Get all modules that have main.py
         self.main_files = []
         # self.instances = []
@@ -35,7 +37,7 @@ class Modules_MultiProcess():
             class_path = self.class_path_pattern.format(main_file[0])
             new_process_class = self.load_from_file(class_path)
 
-            new_process = new_process_class(memory_name, memory_size, app, output)
+            new_process = new_process_class(memory_name, memory_size, app, output, shared_state)
 
             self.instance.start_process(main_file[0], process = new_process)
 

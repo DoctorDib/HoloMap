@@ -11,6 +11,7 @@ interface StateTypes {
     root: RootTypes,
     notification: NotificationQueueInterface,
     dialog: DialogStateInterface,
+    calibrations: Calibrations,
 }
 
 interface RootTypes {
@@ -20,10 +21,32 @@ interface RootTypes {
     qr: QR,
 }
 
+// Calibration - Projector and Webcam
+interface Calibrations {
+    projector: Projector_Calibration,
+    webcam: Webcam_Calibration,
+    cornerPoint: number,
+}
+
+interface Projector_Calibration {
+    edit: boolean,
+    readonly_boundary: object,
+    cached_boundary: object,
+}
+
+interface Webcam_Calibration {
+    edit: boolean,
+    readonly_boundary: object,
+    cached_boundary: object,
+}
+
+
+// QR
 interface QR {
     detected_qrs: Array<Array<Array<number>>>,
 }
 
+// Notifications
 interface NotificationTypeInterface {
     Info: number,
     Success: number,
@@ -40,6 +63,7 @@ interface NotificationQueueInterface {
     queue: Array<NotificationInterface>
 }
 
+// Dialog
 interface DialogInterface {
     header: string,
     message: string,
@@ -89,4 +113,9 @@ export {
 
     // QR Handling
     QR,
+
+    // Vision Aligment
+    Calibrations,
+    Projector_Calibration,
+    Webcam_Calibration,
 };

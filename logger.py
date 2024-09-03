@@ -10,27 +10,33 @@ logging.basicConfig(level=logging.INFO)
 
 stored_logs = []
 
-def user_input(message):
-    log = Log({"type": LogType.USER_INPUT, "message": message})
+def user_input(*args):
+    log_message = " ".join(str(arg) for arg in args)
+    log = Log({"type": LogType.USER_INPUT, "message": log_message})
     add_log(log)
 
-def info(message):
-    log = Log({"type": LogType.INFO, "message": message})
+def info(*args):
+    log_message = " ".join(str(arg) for arg in args)
+    log = Log({"type": LogType.INFO, "message": log_message})
     add_log(log)
 
-def warning(message):
-    log = Log({"type": LogType.WARNING, "message": message})
+def warning(*args):
+    log_message = " ".join(str(arg) for arg in args)
+    log = Log({"type": LogType.WARNING, "message": log_message})
     add_log(log)
 
-def error(message):
-    log = Log({"type": LogType.ERROR, "message": message})
+def error(*args):
+    log_message = " ".join(str(arg) for arg in args)
+    log = Log({"type": LogType.ERROR, "message": log_message})
     add_log(log)
 
-def exception(message):
+def exception(*args):
     exc_type, exc_obj, exc_tb = sys.exc_info()
     fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+    
     # Custom exception message
-    message = "[{0} - {1} (Line: {2})] => {3}".format(exc_type, fname, exc_tb.tb_lineno, message)
+    base_message = " ".join(str(arg) for arg in args)
+    message = "[{0} - {1} (Line: {2})] => {3}".format(exc_type, fname, exc_tb.tb_lineno, base_message)
 
     log = Log({"type": LogType.ERROR, "message": message})
     add_log(log)

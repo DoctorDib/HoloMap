@@ -1,4 +1,5 @@
 from multiprocessing import Queue
+import multiprocessing
 from time import sleep
 from flask import Flask
 
@@ -15,8 +16,8 @@ from Common.ModuleHelper import ModuleHelper
 from Modules.Vision.BoundaryBox import BoundaryBox
 
 class QR_Module(ModuleHelper):
-    def __init__(self, memory_name: str, image_shape=(1080, 1920, 3), app: Flask = None, output: Queue = None):
-        super().__init__("QR", parent_memory_name=memory_name, app=app, output=output)
+    def __init__(self, memory_name: str, image_shape=(1080, 1920, 3), app: Flask = None, output: Queue = None, shared_state: multiprocessing.managers.SyncManager.dict = None):
+        super().__init__("QR", parent_memory_name=memory_name, app=app, output=output, shared_state=shared_state)
 
         self.base_folder_path = os.path.dirname(os.path.abspath(__file__)) + "/Modules"
         
@@ -77,7 +78,7 @@ class QR_Module(ModuleHelper):
                     img = self.receive_image()
 
                     if img is None:
-                        pass
+                        continue
 
                     img = self.cursor_boundary.draw_boundary(img)
 

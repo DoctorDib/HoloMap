@@ -2,46 +2,44 @@ import React, { useEffect, useState } from 'react';
 import { Layer, Projection } from 'react-projection-mapping';
 
 import './display_style.scss';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { StateTypes } from '../../Interfaces/StateInterface';
-import { requestWithLogs } from '../../DataHandler/Actions/rootActions';
-import { TaskEnum } from '../../Common/enumerations';
+import { getCalibrations, projectorSetBoundary } from '../../DataHandler/Calibration/Actions';
 
 interface DisplayComponentInterface {
     content: React.ReactElement,
 }
 
 const DisplayComponent = ({ content }: DisplayComponentInterface): React.ReactElement => {
-    
-    const dispatch = useDispatch();
+    const projectorEdit: boolean = useSelector((state: StateTypes): boolean => state.calibrations.projector.edit);
+    const readonlyBoundary: object = useSelector((state: StateTypes): object => state.calibrations.projector.readonly_boundary);
 
-    const [items, setItems] = useState();
-    
-    const settings: any = useSelector((state: StateTypes): any => state.root.settings);
+    const [localBoundary, setLocalBoundary] = useState<object>();
 
     const update = (layerObj: any) => {
-        if (layerObj.isEnd === true && 'layers' in settings) {
-            const further: any = {
-                'key': 'layers',
-                'value_obj': layerObj.layers,
-            };
+        if (layerObj.isEnd === true && projectorEdit) {
 
-            dispatch(requestWithLogs(TaskEnum.SetSettingsField, further));
+            // Setting in react store and database
+            projectorSetBoundary(layerObj.layers);
         }
     };
 
     useEffect(() => {
-        if ('layers' in settings){
-            setItems(settings.layers);
+        console.log(readonlyBoundary);
+        // Initial setting
+        if (Object.keys(readonlyBoundary).length !== 0 && readonlyBoundary !== undefined) {
+            
+            // Only set if readonly_boundary is populated
+            setLocalBoundary(readonlyBoundary);
         }
-    }, [settings]);
+    }, [readonlyBoundary]);
 
-    return <Projection data={items} onChange={ update } edit={ true } enabled={ true }>
+    useEffect(() => { getCalibrations(); }, []);
+
+    return <Projection data={localBoundary} onChange={ update } edit={ projectorEdit } enabled={ true }>
         <Layer id='main-content'>
             <div className={'projection-content'}>
-                
                 { content }
-
             </div>
         </Layer>;
 
