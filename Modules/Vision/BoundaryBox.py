@@ -2,6 +2,9 @@ import cv2
 import cv2.typing as ty
 import numpy as np
 
+# TODO - Update a way to store boundary boxes where ever needed and only
+#        use the shared_state value when it detects changes from calibrating.
+
 class BoundaryBox():
     
     def __init__(self):

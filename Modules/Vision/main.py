@@ -18,9 +18,6 @@ class Vision_Module(ModuleHelper):
         
         super().__init__("Vision", True, self.base_folder_path, "Modules.Vision.Modules.{0}.main.{0}_Module", app=app, output=output, shared_state=shared_state)
 
-        # Setting up the boundary
-        self.cursor_boundary = BoundaryBox(top_left=(0, 0), top_right=(1920, 0), bottom_right=(1920, 1080), bottom_left=(0, 1080))
-
         # Shared memory setup
         self.memory_name = memory_name
         self.memory_size = memory_size

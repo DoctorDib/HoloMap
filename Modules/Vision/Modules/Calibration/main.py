@@ -20,7 +20,6 @@ class Calibration_Module(ModuleHelper):
 
         self.frame = None
 
-        self.cursor_boundary = BoundaryBox()
 
         # Controlling the UI red marker box
         # 0 = top left
@@ -95,12 +94,11 @@ class Calibration_Module(ModuleHelper):
                 if (not self.shared_state['boundary_box_reset']):
                     self.shared_state['boundary_box_reset'] = True
                     ##  Resetting boundary box
-                    self.cursor_boundary = BoundaryBox()
-                    # self.shared_state['boundary_box'] = BoundaryBox()
-
-                # print(self.shared_state['boundary_box'])
+                    self.shared_state['boundary_box'] = BoundaryBox()
 
                 try:
+                    boundary: BoundaryBox = self.shared_state['boundary_box']
+
                     sleep(.25)
                     img = self.receive_image()
 
@@ -111,7 +109,7 @@ class Calibration_Module(ModuleHelper):
                     if (img is None):
                         continue
 
-                    if (self.cursor_boundary.has_all_points()):
+                    if (boundary.has_all_points()):
                         self.shared_state['boundary_box_reset'] = False # Resetting flag to reset
                         self.shared_state['calibration_flag'] = False # Disabling calibration
                         self.complete_calibration()
@@ -120,7 +118,7 @@ class Calibration_Module(ModuleHelper):
 
                     if (self.shared_state['debug_mode']):
                         # Drawing broundaries
-                        img = self.cursor_boundary.draw_boundary(img)
+                        img = boundary.draw_boundary(img)
 
                         cv2.imshow("Calibration", img)
                         cv2.waitKey(1)
@@ -130,7 +128,7 @@ class Calibration_Module(ModuleHelper):
             cv2.destroyAllWindows()
 
     def new_calibration(self):
-        self.cursor_boundary = BoundaryBox()
+        self.shared_state['boundary_box'] = BoundaryBox()
         self.marker_position = 0
         # Sending marker to the top left position
         self.send_marker_to_position(self.marker_position)
@@ -210,25 +208,29 @@ class Calibration_Module(ModuleHelper):
             marker_width = coords_and_size[1][0]
             marker_height = coords_and_size[1][1]
 
+
+            boundary: BoundaryBox = self.shared_state['boundary_box']
+
             # Top left condition
             if (self.marker_position == 0):
-                self.cursor_boundary.top_left = (marker_x, marker_y)
+                boundary.top_left = (marker_x, marker_y)
             # Top right conditionv
             elif (self.marker_position == 1):
                 x = marker_x + marker_width
                 y = marker_y
-                self.cursor_boundary.top_right = (x, y)
+                boundary.top_right = (x, y)
             # Bottom right condition
             elif (self.marker_position == 2):
                 x = marker_x + marker_width
                 y = marker_y + marker_height
-                self.cursor_boundary.bottom_right = (x, y)
+                boundary.bottom_right = (x, y)
             # Bottom left condition
             elif (self.marker_position == 3):
                 x = marker_x
                 y = marker_y + marker_height
-                self.cursor_boundary.bottom_left = (x, y)
+                boundary.bottom_left = (x, y)
 
+            self.shared_state['boundary_box'] = boundary
             return True
         except Exception as ex:
             print("<<<<<<", ex)
@@ -245,9 +247,11 @@ class Calibration_Module(ModuleHelper):
         })
 
     def complete_calibration(self):
+        boundary: BoundaryBox = self.shared_state['boundary_box']
+        
         # Sending over to client to be saved to the database
         self.output.put({ 
             "name": "Calibration Complete", 
             "tag": "CALIBRATION_COMPLETE", 
-            "data": self.cursor_boundary.get_points_arr()
+            "data": boundary.get_points_arr()
         })

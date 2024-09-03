@@ -3,7 +3,7 @@ import React from 'react';
 import '../App.scss';
 
 import DisplayComponent from '../Components/Display';
-// import Spotlight from '../Components/QR/Spotlight';
+import Spotlight from '../Components/QR/Spotlight';
 import CornerMarkComponent from '../Components/CornerMark';
 import CommandButtonsComponent from '../Components/CommandButtons';
 
@@ -19,6 +19,8 @@ const SandboxPage = (): React.ReactElement => {
                     </div>
 
                     <CornerMarkComponent/>
+
+                    <Spotlight/>
                     
                     <CommandButtonsComponent/>
                 </>)

@@ -1,6 +1,7 @@
 from multiprocessing import Queue
 import multiprocessing
 from time import sleep
+from Modules.Vision.BoundaryBox import BoundaryBox
 from flask import Flask
 
 import os, cv2
@@ -13,7 +14,6 @@ from qrdet import QRDetector
 # from pyzbar.pyzbar import decode
 
 from Common.ModuleHelper import ModuleHelper
-from Modules.Vision.BoundaryBox import BoundaryBox
 
 class QR_Module(ModuleHelper):
     def __init__(self, memory_name: str, image_shape=(1080, 1920, 3), app: Flask = None, output: Queue = None, shared_state: multiprocessing.managers.SyncManager.dict = None):
@@ -28,8 +28,6 @@ class QR_Module(ModuleHelper):
         self.number_of_qr = 0
         self._detection_threshold = 3
         self.detection_counter = 0
-
-        self.cursor_boundary = BoundaryBox(top_left=(400, 400), top_right=(1520, 400), bottom_right=(1720, 880), bottom_left=(200, 880))
 
     def prep(self):
         self.detector = QRDetector(model_size='n', conf_th=.35)
@@ -80,7 +78,8 @@ class QR_Module(ModuleHelper):
                     if img is None:
                         continue
 
-                    img = self.cursor_boundary.draw_boundary(img)
+                    boundary: BoundaryBox = self.shared_state['boundary_box']
+                    img = boundary.draw_boundary(img)
 
                     img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
 
@@ -108,7 +107,7 @@ class QR_Module(ModuleHelper):
                         else:
                             self.detection_counter += 1
 
-                    out = self.cursor_boundary.get_real_coords(detected[0]["quad_xy"], img.shape[1], img.shape[0])
+                    out = boundary.get_real_coords(detected[0]["quad_xy"], img.shape[1], img.shape[0])
 
                     cv2.rectangle(img, (x1, y1), (x2, y2), color=(0, 255, 0), thickness=2)
 
