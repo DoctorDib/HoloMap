@@ -1,3 +1,4 @@
+from Modules.Vision.BoundaryBox import BoundaryBox
 from flask import Blueprint, request
 
 from API.Calibration.datahandler import CalibrationDataHandler
@@ -89,6 +90,18 @@ def create_calibration_route(shared_state):
             # Saving new data
             CalibrationDataHandler().set_calibration(projector_calibration)
             CalibrationDataHandler().set_calibration(webcam_calibration)
+        except Exception as e:
+            logger.exception(e)
+        return {}
+    
+    @calibration_routes_app.route("/calibration/initial/load", methods=['POST'])
+    def calibration_initial_load():
+        try:
+            webcam_calibration = CalibrationDataHandler().get_calibration(CalibrationType.WEBCAM)
+            
+            coords = webcam_calibration.readonly_boundary_obj
+
+            shared_state['boundary_box'] = BoundaryBox(coords[0], coords[1], coords[2], coords[3])
         except Exception as e:
             logger.exception(e)
         return {}

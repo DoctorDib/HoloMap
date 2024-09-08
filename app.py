@@ -1,13 +1,12 @@
 from multiprocessing import Queue
-import multiprocessing
 from config import Config
 from flask import Flask
 from flask_cors import CORS
 from gevent import monkey, sleep
-import sys, os
 
 import eventlet
 import eventlet.wsgi
+import os, multiprocessing
 
 # COMMON
 from Common.Classes.instance import Instance
@@ -19,7 +18,6 @@ from API.Calibration.routes import create_calibration_route
 from API.socket import SocketIOHandler
 from API.shared_state import SharedState
 
-dev_mode = len(sys.argv) > 1 and sys.argv[1] == "DEV"
 MainInstance : Instance = None
 
 def create_flask_app(manager: SharedState):
@@ -35,7 +33,7 @@ def create_flask_app(manager: SharedState):
     def initialise():
         return {
             "settings": settings_get(),
-            #"calibrations": calibration_get_all(),
+            # "calibrations": calibration_get_all(),
         }
 
     return app

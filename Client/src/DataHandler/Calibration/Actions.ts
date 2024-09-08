@@ -110,3 +110,8 @@ export const saveCalibration = async () => {
     // Getting the newely saved calibrations
     getCalibrations();
 };
+
+export const initialCalibrationLoad = async () => {
+    // Updating database
+    await utils.sendData('/calibration/initial/load');
+};

@@ -22,7 +22,6 @@ class Modules_MultiProcess():
                    output: multiprocessing.Queue = None, shared_state: multiprocessing.managers.SyncManager.dict = None):
         # Get all modules that have main.py
         self.main_files = []
-        # self.instances = []
 
         # Loop through all items in the base folder
         for item in os.listdir(self.base_folder_path):
