@@ -36,21 +36,23 @@ const Spotlight = () => {
                 // Clear the canvas
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-                // Begin drawing the square
-                ctx.beginPath();
-                ctx.moveTo(detected[0][0][0], detected[0][0][1]);
-                ctx.lineTo(detected[0][1][0], detected[0][1][1]);
-                ctx.lineTo(detected[0][2][0], detected[0][2][1]);
-                ctx.lineTo(detected[0][3][0], detected[0][3][1]);
-                ctx.closePath();
+                if (detected.length > 0) {
+                    // Begin drawing the square
+                    ctx.beginPath();
+                    ctx.moveTo(detected[0][0][0], detected[0][0][1]);
+                    ctx.lineTo(detected[0][1][0], detected[0][1][1]);
+                    ctx.lineTo(detected[0][2][0], detected[0][2][1]);
+                    ctx.lineTo(detected[0][3][0], detected[0][3][1]);
+                    ctx.closePath();
 
-                // Optional: Set stroke and fill style
-                ctx.strokeStyle = 'black';
-                ctx.fillStyle = 'lightblue';
+                    // Optional: Set stroke and fill style
+                    ctx.strokeStyle = 'black';
+                    ctx.fillStyle = 'lightblue';
 
-                // Draw the square
-                ctx.fill();
-                ctx.stroke();
+                    // Draw the square
+                    ctx.fill();
+                    ctx.stroke();    
+                }
             }
         }
     }, [qrs]);

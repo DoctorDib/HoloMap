@@ -35,6 +35,10 @@ const QrSocketActions = (parsedData: SocketInterface): void => {
                 type: DataActionEnum.QR_SetDetectionList,
                 data: parsedData,
             });
+        case 'CLEAR_QR':
+            return getStore().dispatch({
+                type: DataActionEnum.QR_EmptyDetectionList,
+            });
     }
 };
 

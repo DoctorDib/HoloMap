@@ -29,6 +29,8 @@ class QR_Module(ModuleHelper):
         self._detection_threshold = 3
         self.detection_counter = 0
 
+        self.detected_qr = False
+
     def prep(self):
         self.detector = QRDetector(model_size='n', conf_th=.35)
 
@@ -92,6 +94,15 @@ class QR_Module(ModuleHelper):
 
                         detected = self.detector.detect(image=img, is_bgr=True)
                         if (len(detected) == 0):
+                            if (self.detected_qr):
+
+                                self.detected_qr = False
+
+                                # Remove any boxes from client ui
+                                self.output.put({ 
+                                    "name": "Clear all QR detections", 
+                                    "tag": "CLEAR_QR",
+                                })
                             continue
 
                         for detection in detected:
@@ -106,7 +117,6 @@ class QR_Module(ModuleHelper):
 
                         if (len(detected) != self.number_of_qr):
                             if (self.detection_counter >= self._detection_threshold or len(detected) < self.number_of_qr):
-                                print(detected)
                                 self.number_of_qr = len(detected)
                                 self.new_qr(img)
                                 self.reset()
@@ -116,6 +126,8 @@ class QR_Module(ModuleHelper):
                         out = boundary_state.value.get_real_coords(detected[0]["quad_xy"], img.shape[1], img.shape[0])
 
                         cv2.rectangle(img, (x1, y1), (x2, y2), color=(0, 255, 0), thickness=2)
+
+                        self.detected_qr = True
 
                         self.output.put({ 
                             "name": "Detected QR", 
@@ -127,6 +139,6 @@ class QR_Module(ModuleHelper):
                         cv2.waitKey(1)
                     
                 except Exception as e:
-                    print("QR Error: ", e)
+                    logger.error("QR Error: ", e)
         finally:
             cv2.destroyAllWindows()

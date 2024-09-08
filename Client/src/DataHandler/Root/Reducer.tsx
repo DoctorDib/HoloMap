@@ -55,6 +55,15 @@ const reducer = (state = initialResultState, action: any = { }) => { // TODO - B
                     detected_qrs: action.data.data,
                 },
             };
+        case DataActionEnum.QR_EmptyDetectionList:
+            // console.log(state);
+            return {
+                ...state,
+                qr: {
+                    ... state.qr,
+                    detected_qrs: [],
+                },
+            };
     }
 };
 

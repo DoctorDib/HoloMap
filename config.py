@@ -2,7 +2,6 @@ from dotenv import load_dotenv
 
 import logging
 import os, inspect
-import logger
 
 MAIN_PATH = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 
@@ -45,7 +44,7 @@ class Config():
                 return self.cached_data[key]
             else:
                 new_data = int(os.getenv(key))
-                logger.info(f"{key}: {new_data}")
+                print(f"{key}: {new_data}")
                 self.cached_data.update({key: new_data})
                 return new_data
         except Exception as e:
