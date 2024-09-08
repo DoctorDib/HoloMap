@@ -4,7 +4,6 @@ from API.Calibration.datahandler import CalibrationDataHandler
 from API.Calibration.sql import CalibrationType
 
 import logger
-from API.shared_state import SharedStateManager
 
 calibration_routes_app = Blueprint('calibration_routes_app', __name__)
 

@@ -17,12 +17,12 @@ from API.Settings.routes import settings_routes_app, settings_get
 from API.Calibration.routes import create_calibration_route
 # Sockets
 from API.socket import SocketIOHandler
-from API.shared_state import SharedStateManager
+from API.shared_state import SharedState
 
 dev_mode = len(sys.argv) > 1 and sys.argv[1] == "DEV"
 MainInstance : Instance = None
 
-def create_flask_app(manager: SharedStateManager):
+def create_flask_app(manager: SharedState):
     app = Flask(__name__)
 
     # Initiating routes
@@ -48,7 +48,7 @@ def run_server(manager):
         MainInstance = Instance()
         MainInstance.initialise()
 
-        managers = SharedStateManager(manager)
+        managers = SharedState(manager)
         # Setting debug mode globally
         managers.set_state("debug_mode", bool(Config().get_int("DEBUG_MODE")))
 

@@ -1,14 +1,13 @@
 from multiprocessing import Queue
 import multiprocessing
 import os
+from API.shared_state import DebugModeFlagFactory
 import cv2
 from flask import Flask
-from gevent import sleep
 import numpy as np
 import logger
 
 from Common.ModuleHelper import ModuleHelper
-from Modules.Vision.BoundaryBox import BoundaryBox
 
 class Vision_Module(ModuleHelper):
     def __init__(self, memory_name: str = None, memory_size: int = 1920 * 1080 * 3,
@@ -38,8 +37,8 @@ class Vision_Module(ModuleHelper):
         self.detector.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.4)  # Disable auto exposure (0.25 is manual mode, 0.75 is auto)
 
         # Manually set exposure and white balance if needed
-        #self.detector.set(cv2.CAP_PROP_EXPOSURE, -5)  # Adjust this value as needed
-        #self.detector.set(cv2.CAP_PROP_WB_TEMPERATURE, 4500)  # Adjust this value as needed
+        # self.detector.set(cv2.CAP_PROP_EXPOSURE, -5)  # Adjust this value as needed
+        # self.detector.set(cv2.CAP_PROP_WB_TEMPERATURE, 4500)  # Adjust this value as needed
 
     def run(self):
         if self.detector is None:
@@ -49,21 +48,21 @@ class Vision_Module(ModuleHelper):
             while not self.shutdown_event.is_set():
                 img = self.camera_stuff()
 
-                sleep(0.1)
-
                 if img is not None:
                     try:
                         # Send image over shared memory
                         self.send_img_via_shared_memory(img)
                     except Exception as e:
-                        print("Uhh Ohh", e)
+                        logger.error("send_img_via_shared_memory: ", e)
                         pass
 
-                if img is not None and self.shared_state['debug_mode']:
-                    cv2.imshow("Result", img)
-                    cv2.waitKey(1)  
+                with DebugModeFlagFactory(self.shared_state, read_only=True) as flag_state:
+                    if img is not None and flag_state.value:
+                        cv2.imshow("Result", img)
+                        cv2.waitKey(1)  
+
         except Exception as e:
-            print(e)
+            logger.error(e)
         finally:
             logger.info("Shutting down CV2 capture")
             self.detector.release()

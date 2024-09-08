@@ -1,19 +1,66 @@
-from multiprocessing import Manager
+import multiprocessing
 
 from Modules.Vision.BoundaryBox import BoundaryBox
 
-class SharedStateManager:
+import logger
+
+class SharedStateValue:
+    def __init__(self, key: str, shared_state: multiprocessing.managers.SyncManager.dict, read_only: bool = False):
+        self.shared_state = shared_state
+        self.read_only = read_only
+
+        self.key = key
+        self.value = None
+
+    def __enter__(self):
+        self.value = self.shared_state.get(self.key)
+        return self
+
+    def __exit__(self, exc_type, exc_val: BaseException, exc_tb) -> bool:
+        if exc_type:
+            logger.error(f"Shared State Manager for {self.key}: {exc_type}, {exc_val}")
+            return False
+
+        if (not self.read_only):
+            self.shared_state[self.key] = self.value
+
+        return True
+
+class BoundaryBoxFactory(SharedStateValue):
+    def __init__(self, shared_state: multiprocessing.managers.SyncManager.dict, read_only: bool = False):
+        super().__init__('boundary_box', shared_state, read_only)
+        self.value: BoundaryBox
+
+class CalibrationFlagFactory(SharedStateValue):
+    def __init__(self, shared_state: multiprocessing.managers.SyncManager.dict, read_only: bool = False):
+        super().__init__('calibration_flag', shared_state, read_only)
+        self.value: bool
+
+class BoundaryBoxResetFlagFactory(SharedStateValue):
+    def __init__(self, shared_state: multiprocessing.managers.SyncManager.dict, read_only: bool = False):
+        super().__init__('boundary_box_reset', shared_state, read_only)
+        self.value: bool
+
+class DebugModeFlagFactory(SharedStateValue):
+    def __init__(self, shared_state: multiprocessing.managers.SyncManager.dict, read_only: bool = False):
+        super().__init__('debug_mode', shared_state, read_only)
+        self.value: bool
+
+class SharedState:
     def __init__(self, manager):
         self.shared_state = manager.dict()
 
         # Presets - not really needed but keeping just in case
-        self.shared_state['debug_mode'] = False
-
-        self.shared_state['boundary_box'] = BoundaryBox()
+        with DebugModeFlagFactory(self.shared_state) as state:
+            state.value = False
+        with BoundaryBoxFactory(self.shared_state) as state:
+            state.value = BoundaryBox()
 
         # Calibration specifics
-        self.shared_state['calibration_flag'] = False
-        self.shared_state['boundary_box_reset'] = False
+        with CalibrationFlagFactory(self.shared_state) as state:
+            state.value = False
+        with BoundaryBoxResetFlagFactory(self.shared_state) as state:
+            state.value = False
 
     def get_shared_state(self):
         """

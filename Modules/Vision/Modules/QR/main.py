@@ -1,7 +1,7 @@
 from multiprocessing import Queue
 import multiprocessing
 from time import sleep
-from Modules.Vision.BoundaryBox import BoundaryBox
+from API.shared_state import BoundaryBoxFactory, CalibrationFlagFactory
 from flask import Flask
 
 import os, cv2
@@ -52,14 +52,12 @@ class QR_Module(ModuleHelper):
 
     def new_qr(self, img):
         val = self.detector.detect_and_decode(image=img, is_bgr=True)
-        print(val)
-
+        
         for qr in val:
-            print(qr)
-
             if (qr is None):
                 self.number_of_qr = -1
                 return
+        pass
 
     def reset(self):
         self.detection_counter = 0
@@ -71,6 +69,12 @@ class QR_Module(ModuleHelper):
 
         try:
             while not self.shutdown_event.is_set():
+
+                with CalibrationFlagFactory(self.shared_state, read_only=True) as flag_instance:
+                    # Don't run if calibrating
+                    if (flag_instance.value):
+                        continue
+                    
                 try:
                     sleep(.25)
                     img = self.receive_image()
@@ -78,47 +82,49 @@ class QR_Module(ModuleHelper):
                     if img is None:
                         continue
 
-                    boundary: BoundaryBox = self.shared_state['boundary_box']
-                    img = boundary.draw_boundary(img)
+                    with BoundaryBoxFactory(self.shared_state, read_only=True) as boundary_state:
+                        img = boundary_state.value.draw_boundary(img)
 
-                    img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+                        img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
 
-                    # TODO - Image processing? 
-                    #      - Need to research the best effective way of reading a QR
+                        # TODO - Image processing? 
+                        #      - Need to research the best effective way of reading a QR
 
-                    detected = self.detector.detect(image=img, is_bgr=True)
+                        detected = self.detector.detect(image=img, is_bgr=True)
+                        if (len(detected) == 0):
+                            continue
 
-                    for detection in detected:
-                        x1, y1, x2, y2 = detection['bbox_xyxy']
-                        x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
-                        confidence = detection['confidence']
-                        # Drawin square around qr
+                        for detection in detected:
+                            x1, y1, x2, y2 = detection['bbox_xyxy']
+                            x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
+                            confidence = detection['confidence']
+                            # Drawin square around qr
+                            cv2.rectangle(img, (x1, y1), (x2, y2), color=(0, 255, 0), thickness=2)
+                            # Inserting confidence on image
+                            cv2.putText(img, f'{confidence:.2f}', (x1, y1 - 10), fontFace=cv2.FONT_HERSHEY_SIMPLEX,
+                                        fontScale=1, color=(0, 255, 0), thickness=2)
+
+                        if (len(detected) != self.number_of_qr):
+                            if (self.detection_counter >= self._detection_threshold or len(detected) < self.number_of_qr):
+                                print(detected)
+                                self.number_of_qr = len(detected)
+                                self.new_qr(img)
+                                self.reset()
+                            else:
+                                self.detection_counter += 1
+
+                        out = boundary_state.value.get_real_coords(detected[0]["quad_xy"], img.shape[1], img.shape[0])
+
                         cv2.rectangle(img, (x1, y1), (x2, y2), color=(0, 255, 0), thickness=2)
-                        # Inserting confidence on image
-                        cv2.putText(img, f'{confidence:.2f}', (x1, y1 - 10), fontFace=cv2.FONT_HERSHEY_SIMPLEX,
-                                    fontScale=1, color=(0, 255, 0), thickness=2)
 
-                    if (len(detected) != self.number_of_qr):
-                        if (self.detection_counter >= self._detection_threshold or len(detected) < self.number_of_qr):
-                            print(detected)
-                            self.number_of_qr = len(detected)
-                            self.new_qr(img)
-                            self.reset()
-                        else:
-                            self.detection_counter += 1
-
-                    out = boundary.get_real_coords(detected[0]["quad_xy"], img.shape[1], img.shape[0])
-
-                    cv2.rectangle(img, (x1, y1), (x2, y2), color=(0, 255, 0), thickness=2)
-
-                    self.output.put({ 
-                        "name": "Detected QR", 
-                        "tag": "QR_DETECTION", 
-                        "data": [out]
-                    })
-    
-                    cv2.imshow("QR", img)
-                    cv2.waitKey(1)
+                        self.output.put({ 
+                            "name": "Detected QR", 
+                            "tag": "QR_DETECTION", 
+                            "data": [out]
+                        })
+        
+                        cv2.imshow("QR", img)
+                        cv2.waitKey(1)
                     
                 except Exception as e:
                     print("QR Error: ", e)

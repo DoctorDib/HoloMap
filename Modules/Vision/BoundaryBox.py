@@ -1,3 +1,5 @@
+from Modules.Vision.OutlierDetection import CalibrationOutlierDetection
+
 import cv2
 import cv2.typing as ty
 import numpy as np
@@ -6,18 +8,38 @@ import numpy as np
 #        use the shared_state value when it detects changes from calibrating.
 
 class BoundaryBox():
-    
-    def __init__(self):
-        self.line_thickess: int = 3
 
     def __init__(self, top_left: ty.Point = None, top_right: ty.Point = None, bottom_right: ty.Point = None, bottom_left: ty.Point = None):
         # Constants
         self.line_thickess: int = 3
 
+        # TODO - Get an array of array of corners and the check for outliers after 
+        #        each loop then average the none outliers
+
+        self.points: list[list[tuple]] = [] # Example input: [[ (0, 0), (0, 0), (0, 0), (0, 0) ], [ (0, 0), (0, 0), (0, 0), (0, 0) ]]
+
+        self.temp_top_left: ty.Point = top_left
+        self.temp_top_right: ty.Point = top_right
+        self.temp_bottom_right: ty.Point = bottom_right
+        self.temp_bottom_left: ty.Point = bottom_left
+
         self.top_left: ty.Point = top_left
         self.top_right: ty.Point = top_right
         self.bottom_right: ty.Point = bottom_right
         self.bottom_left: ty.Point = bottom_left
+
+        self.outlier_detection = CalibrationOutlierDetection()
+
+    def reset(self):
+        self.top_left_average = []
+        self.top_right_average = []
+        self.bottom_right_average = []
+        self.bottom_left_average = []
+
+        self.top_left = None
+        self.top_right = None
+        self.bottom_right = None
+        self.bottom_left = None
 
     def is_in_boundary(self, x: int, y: int) -> bool:
         points = [self.top_left, self.top_right, self.bottom_right, self.bottom_left]
@@ -81,7 +103,7 @@ class BoundaryBox():
         transformed_box = cv2.perspectiveTransform(np.array([arr], dtype='float32'), matrix)
         
         # Reshape the result to match the input_box shape
-        return transformed_box.reshape(-1, 2)
+        return transformed_box.reshape(-1, 2)      
 
     def get_points_arr(self) -> list[int]:
         return [self.top_left, self.top_right, self.bottom_right, self.bottom_left]
@@ -91,3 +113,46 @@ class BoundaryBox():
         self.top_right = points[1]
         self.bottom_right = points[2]
         self.bottom_left = points[3]
+
+
+    def insert(self, index: int, position: ty.Point):
+        if (index == 0):
+            self.temp_top_left = position
+        elif (index == 1):
+            self.temp_top_right = position
+        elif (index == 2):
+            self.temp_bottom_right = position
+        elif (index == 3):
+            self.temp_bottom_left = position
+
+    def new_round(self):
+        self.points.append([self.temp_top_left, self.temp_top_right, self.temp_bottom_right, self.temp_bottom_left])
+
+        # Resetting points
+        self.temp_top_left = []
+        self.temp_top_right = []
+        self.temp_bottom_right = []
+        self.temp_bottom_left = []
+
+    def apply(self):
+        # Remove outliers
+        clean_data, _ = self.outlier_detection.detect_outliers_in_data(self.points)
+        
+        # Get average of points
+        averaged_points = self.average_points(clean_data)
+
+        # Reset
+        self.top_left = (int(averaged_points[0][0]), int(averaged_points[0][1]))
+        self.top_right = (int(averaged_points[1][0]), int(averaged_points[1][1]))
+        self.bottom_right = (int(averaged_points[2][0]), int(averaged_points[2][1]))
+        self.bottom_left = (int(averaged_points[3][0]), int(averaged_points[3][1]))
+
+    def average_points(self, clean_points):
+        # Convert the list of lists of tuples into a numpy array for easier manipulation
+        arr = np.array(clean_points, dtype=float)
+        
+        # Calculate the mean along the 0th axis (average across the first dimension)
+        average = np.mean(arr, axis=0)
+        
+        # Convert back to a list of tuples for the result
+        return [tuple(point) for point in average]
