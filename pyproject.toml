@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "holomap-server"
+version = "0.1.0"
+description = ""
+authors = ["James Dibnah <jamesdibnah@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+python-dotenv = "^1.0.1"
+flask = "^3.0.3"
+flask-cors = "^5.0.0"
+gevent = "^24.2.1"
+eventlet = "^0.37.0"
+numpy = "^2.1.1"
+opencv-python = "^4.10.0.84"
+flask-socketio = "^5.3.7"
+qrdet = "^2.5"
+
+
+[build-system]
+requires = ["poetry-core>=1.0.0", "setuptools"]
+build-backend = "poetry.core.masonry.api"
