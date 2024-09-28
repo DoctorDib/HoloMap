@@ -1,4 +1,4 @@
-import multiprocessing
+import multiprocessing, numpy
 
 from Modules.Vision.BoundaryBox import BoundaryBox
 
@@ -45,6 +45,11 @@ class DebugModeFlagFactory(SharedStateValue):
     def __init__(self, shared_state: multiprocessing.managers.SyncManager.dict, read_only: bool = False):
         super().__init__('debug_mode', shared_state, read_only)
         self.value: bool
+
+class CameraFactory(SharedStateValue):
+    def __init__(self, camera_name, shared_state: multiprocessing.managers.SyncManager.dict, read_only: bool = False):
+        super().__init__(camera_name, shared_state, read_only)
+        self.value: numpy.ndarray
 
 class SharedState:
     def __init__(self, manager):

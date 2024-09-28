@@ -1,7 +1,7 @@
 from multiprocessing import Queue
 import multiprocessing
 import os
-from API.shared_state import DebugModeFlagFactory
+from API.shared_state import CameraFactory, DebugModeFlagFactory
 import cv2
 from flask import Flask
 import numpy as np
@@ -58,8 +58,9 @@ class Vision_Module(ModuleHelper):
 
                 with DebugModeFlagFactory(self.shared_state, read_only=True) as flag_state:
                     if img is not None and flag_state.value:
-                        cv2.imshow("Result", img)
-                        cv2.waitKey(1)  
+                        with CameraFactory("main_camera", self.shared_state) as camera_state:
+                            camera_state.value = img
+                        cv2.waitKey(1)
 
         except Exception as e:
             logger.error(e)

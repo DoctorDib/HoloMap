@@ -11,7 +11,7 @@ import multiprocessing.managers
 from Common.ModuleHelper import ModuleHelper
 from Modules.Vision.BoundaryBox import BoundaryBox
 from Modules.Vision.OutlierDetection import CalibrationOutlierDetection
-from API.shared_state import BoundaryBoxFactory, BoundaryBoxResetFlagFactory, CalibrationFlagFactory, DebugModeFlagFactory
+from API.shared_state import BoundaryBoxFactory, BoundaryBoxResetFlagFactory, CalibrationFlagFactory, CameraFactory, DebugModeFlagFactory
 
 class Calibration_Module(ModuleHelper):
     def __init__(self, memory_name: str, image_shape=(1080, 1920, 3), app: Flask = None, output: Queue = None, 
@@ -144,8 +144,10 @@ class Calibration_Module(ModuleHelper):
                                     img = cv2.putText(img, 'Bottom Right: ' + str(boundary_state.value.bottom_right), (500, 1000), font, fontScale, color, thickness, cv2.LINE_AA)
                                     img = cv2.putText(img, 'Bottom Left: ' + str(boundary_state.value.bottom_left), (500, 1050), font, fontScale, color, thickness, cv2.LINE_AA)
 
-                            cv2.imshow("Calibration", img)
+                            with CameraFactory("calibration_camera", self.shared_state) as calibration_camera:
+                                calibration_camera.value = img
                             cv2.waitKey(1)
+
                 except Exception as e:
                     logger.error("Calibration Error: ", e)
 

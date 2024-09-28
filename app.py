@@ -17,6 +17,8 @@ from API.Calibration.routes import create_calibration_route
 # Sockets
 from API.socket import SocketIOHandler
 from API.shared_state import SharedState
+# Debugging tools
+from API.camera_viewer import CameraViewerHandler
 
 MainInstance : Instance = None
 
@@ -47,8 +49,10 @@ def run_server(manager):
         MainInstance.initialise()
 
         managers = SharedState(manager)
+
         # Setting debug mode globally
-        managers.set_state("debug_mode", bool(Config().get_int("DEBUG_MODE")))
+        debug_mode = bool(Config().get_int("DEBUG_MODE"))
+        managers.set_state("debug_mode", debug_mode)
 
         app = create_flask_app(managers.get_shared_state())
 
@@ -58,10 +62,13 @@ def run_server(manager):
         socketio_handler.start_server(app)
         socketio_handler.start_queue_processor(output)
 
+        if (debug_mode):
+            camera_handler = CameraViewerHandler()
+            camera_handler.start_server(app, managers.get_shared_state())
+
         # Modules system for vision
         base_folder_path = os.path.dirname(os.path.abspath(__file__)) + "/Modules"
         modules = Modules_MultiProcess(base_folder_path, "Modules.{0}.main.{0}_Module")
-
 
         modules.initialise(None, output=output, shared_state=managers.get_shared_state())
 
@@ -78,6 +85,7 @@ def run_server(manager):
         # # MainInstance.close_instance()
         # print("Shutting down application - Good bye")
         # # MainInstance.shutdown()
+        #camera_handler.shutdown()?????
 
         # socketio_handler.shutdown()
 

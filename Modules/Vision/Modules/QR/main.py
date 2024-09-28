@@ -1,7 +1,7 @@
 from multiprocessing import Queue
 import multiprocessing
 from time import sleep
-from API.shared_state import BoundaryBoxFactory, CalibrationFlagFactory
+from API.shared_state import BoundaryBoxFactory, CalibrationFlagFactory, CameraFactory
 from flask import Flask
 
 import os, cv2
@@ -135,7 +135,8 @@ class QR_Module(ModuleHelper):
                             "data": [out]
                         })
         
-                        cv2.imshow("QR", img)
+                        with CameraFactory("qr_camera", self.shared_state) as camera_state:
+                            camera_state.value = img
                         cv2.waitKey(1)
                     
                 except Exception as e:
