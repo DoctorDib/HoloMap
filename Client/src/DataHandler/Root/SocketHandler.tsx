@@ -23,6 +23,7 @@ const createSocket = (): Socket => {
 
         QrSocketActions(parsedData);
         CalibrationSocketActions(parsedData);
+        CursorSocketActions(parsedData);
     });
 
     return socket;
@@ -38,6 +39,20 @@ const QrSocketActions = (parsedData: SocketInterface): void => {
         case 'CLEAR_QR':
             return getStore().dispatch({
                 type: DataActionEnum.QR_EmptyDetectionList,
+            });
+    }
+};
+
+const CursorSocketActions = (parsedData: SocketInterface): void => {
+    switch (parsedData.tag) {
+        case 'CURSOR_POINT':
+            return getStore().dispatch({
+                type: DataActionEnum.Cursor_Set,
+                data: parsedData,
+            });
+        case 'CLEAR_CURSOR':
+            return getStore().dispatch({
+                type: DataActionEnum.Cursor_Reset,
             });
     }
 };

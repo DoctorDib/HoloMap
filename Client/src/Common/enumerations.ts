@@ -52,9 +52,13 @@ const DataActionEnum = {
     Projector_SetBoundary: 55,
     Projector_GetCalibration: 56,
 
-    GetCalibrations: 57,
-    NextCalibrationPoint: 58,
-    CompleteCalibration: 59,
+    GetCalibrations: 58,
+    NextCalibrationPoint: 59,
+    CompleteCalibration: 510,
+
+    // Cursor
+    Cursor_Set: 61,
+    Cursor_Reset: 62,
 };
 
 const NotificationActionEnums = {

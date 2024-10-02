@@ -1,6 +1,7 @@
 from abc import abstractmethod
 from multiprocessing import Event, Process, Queue, shared_memory
 import multiprocessing
+import numpy as np
 
 from flask import Flask
 
@@ -79,6 +80,38 @@ class ModuleHelper(Process):
         
         logger.info(f"Gracefully shutting down {self._name}")
         self.shutdown_event.set()
+
+    def set_up_frame(self):
+        """
+        Sets up the frame by linking it to the shared memory buffer.
+
+        Returns:
+            np.ndarray: The frame as a NumPy array.
+        """
+        # Ensure the buffer is large enough for the image
+        buffer_size = np.prod(self.image_shape)
+        if len(self.parent_memory.buf) < buffer_size:
+            raise ValueError("Buffer size is too small for the image. Ensure the shared memory size is correct.")
+
+        self.frame = np.ndarray((1080, 1920, 3), dtype=np.uint8, buffer=self.parent_memory.buf)
+        logger.info(f"Attempting to set up Camera")
+        
+        return self.frame
+    
+    def receive_image(self):
+        """
+        Receives the image from the shared memory buffer.
+
+        Returns:
+            np.ndarray or None: The image frame if available; otherwise, None.
+        """
+        if self.frame is not None and self.frame.size > 0 and not np.all(self.frame) and np.any(self.frame):
+            # Ensuring they can modify their own images without affecting other threads
+            img_copy = self.frame.copy()
+            return img_copy
+        else:
+            self.set_up_frame()
+            return None
 
     def __del__(self):
         if (self.memory is not None):

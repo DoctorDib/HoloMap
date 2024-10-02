@@ -19,6 +19,7 @@ interface RootTypes {
     settings: object, // TODO - Look more into interfaces for this?
     socket?: Socket,
     qr: QR,
+    cursor: Cursor,
 }
 
 // Calibration - Projector and Webcam
@@ -44,6 +45,12 @@ interface Webcam_Calibration {
 // QR
 interface QR {
     detected_qrs: Array<Array<Array<number>>>,
+}
+
+// Cursor
+interface Cursor {
+    x: number,
+    y: number,
 }
 
 // Notifications
@@ -113,6 +120,9 @@ export {
 
     // QR Handling
     QR,
+
+    // Cursor Handling 
+    Cursor,
 
     // Vision Aligment
     Calibrations,

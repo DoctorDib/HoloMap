@@ -104,6 +104,44 @@ class BoundaryBox():
         
         # Reshape the result to match the input_box shape
         return transformed_box.reshape(-1, 2)      
+    
+    def get_relative_position(self, img, point):
+        """
+        Get the relative position of a point in a quadrilateral boundary box.
+
+        Parameters:
+        - point: Tuple (x, y) representing the point coordinates.
+        - box_coords: List of tuples containing the coordinates of the boundary box corners 
+                    in the order: top-left, top-right, bottom-right, bottom-left.
+                    Format: [(x1, y1), (x2, y2), (x3, y3), (x4, y4)]
+
+        Returns:
+        - Tuple (relative_x, relative_y) if the point is within the boundary box,
+        otherwise None.
+        """
+        x, y = point
+
+        box_coords = [(self.top_left[0], self.top_left[1]), (self.top_right[0], self.top_right[1]), (self.bottom_right[0], self.bottom_right[1]), (self.bottom_left[0], self.bottom_left[1])]
+        box_coords_np = np.array(box_coords, dtype='float32')
+
+        # Get the dimensions of the input image
+        height, width = img.shape[:2]
+
+        # Create a mask for the defined quadrilateral
+        mask = np.zeros((height, width), dtype=np.uint8)  # Match mask size to image size
+        cv2.fillConvexPoly(mask, box_coords_np.astype(int), 255)  # Fill the polygon
+
+        target_pts = np.array([[0, 0], [1, 0], [1, 1], [0, 1]], dtype='float32')
+        transform_matrix = cv2.getPerspectiveTransform(box_coords_np, target_pts)
+
+        # Transform the point
+        point_np = np.array([[x, y]], dtype='float32')
+        transformed_point = cv2.perspectiveTransform(point_np[None, :], transform_matrix)[0][0]
+
+        relative_x = int(transformed_point[0] * width)
+        relative_y = int(transformed_point[1] * height) 
+
+        return (int(relative_x), int(relative_y))
 
     def get_points_arr(self) -> list[int]:
         return [self.top_left, self.top_right, self.bottom_right, self.bottom_left]

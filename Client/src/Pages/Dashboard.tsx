@@ -34,7 +34,6 @@ const LandingPage = forwardRef((): React.ReactElement => {
 
         { MainDashboard }
 
-
         <div className={'dashboard-content-parent'}>
             <Projection data={ data } onChange={ update } edit={ true } enabled={ true }>
                 <Layer id='total'>

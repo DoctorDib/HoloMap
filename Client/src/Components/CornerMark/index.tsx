@@ -72,7 +72,7 @@ const CornerMarkComponent = (): React.ReactElement => {
         return () => clearInterval(intervalId);
     }, [transitionRedMarker]);
 
-    return <div className={'corner_mark'} style={{ justifyContent: justifyContent, alignItems: alignItems }}>
+    return <div className={'corner-mark'} style={{ justifyContent: justifyContent, alignItems: alignItems, background: webcamEdit ? '#383838' : 'transparent' }}>
         <div className={'centered-item'}>
             {/* Apply button when python boundary active */}
             {
@@ -82,6 +82,7 @@ const CornerMarkComponent = (): React.ReactElement => {
                     <div className={'title'}>
                         <div> Corner Alignment </div>
                         <div> Active </div>
+                        <ButtonComponent Text={'Cancel'} OnClick={CancelCalibration} />
                     </div>    
                 </>) : null
             }
@@ -89,8 +90,8 @@ const CornerMarkComponent = (): React.ReactElement => {
             {/* Apply button when client boundary active */}
             {
                 projectorEdit ? <div className={'button-parent'}>
-                    <ButtonComponent Text={'Apply'} OnClick={() => ApplyNewPosition()} />
-                    <ButtonComponent Text={'Cancel'} OnClick={() => CancelCalibration()} />
+                    <ButtonComponent Text={'Apply'} OnClick={ApplyNewPosition} />
+                    <ButtonComponent Text={'Cancel'} OnClick={CancelCalibration} />
                 </div> : null
             }
         </div>

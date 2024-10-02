@@ -1,25 +1,23 @@
 import { useEffect, useRef } from 'react';
 
-import './spotlight-style.scss';
+import './cursor-style.scss';
 import { useSelector } from 'react-redux';
-import { QR, StateTypes } from '../../../Interfaces/StateInterface';
+import { Cursor, StateTypes } from '../../Interfaces/StateInterface';
 
-const Spotlight = () => {
+const CursorComponent = () => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const canvaContainerRef = useRef<HTMLDivElement>(null);
 
-    const qrs: QR = useSelector((state: StateTypes): QR => state.root.qr);
+    const cursor: Cursor = useSelector((state: StateTypes): Cursor => state.root.cursor);
 
     useEffect(() => {
+        console.log(cursor);
         const canvas = canvasRef.current;
         const container = canvaContainerRef.current;
         if (canvas) {
 
-            if (qrs === undefined)
+            if (cursor === undefined)
                 return;
-
-            const detected = qrs.detected_qrs;
-            console.log(detected);
 
             const ctx = canvas.getContext('2d');
 
@@ -37,26 +35,21 @@ const Spotlight = () => {
                 // Clear the canvas
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-                if (detected.length > 0) {
-                    // Begin drawing the square
-                    ctx.beginPath();
-                    ctx.moveTo(detected[0][0][0], detected[0][0][1]);
-                    ctx.lineTo(detected[0][1][0], detected[0][1][1]);
-                    ctx.lineTo(detected[0][2][0], detected[0][2][1]);
-                    ctx.lineTo(detected[0][3][0], detected[0][3][1]);
-                    ctx.closePath();
+                // Begin drawing the square
+                ctx.beginPath();
+                ctx.arc(cursor.x, cursor.y, 10, 0, 2 * Math.PI, false);
+                ctx.closePath();
 
-                    // Optional: Set stroke and fill style
-                    ctx.strokeStyle = 'black';
-                    ctx.fillStyle = 'rgba(255, 255, 255, 0.20)';
+                // Optional: Set stroke and fill style
+                ctx.strokeStyle = 'black';
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.20)';
 
-                    // Draw the square
-                    ctx.fill();
-                    ctx.stroke();    
-                }
+                // Draw the square
+                ctx.fill();
+                ctx.stroke();    
             }
         }
-    }, [qrs]);
+    }, [cursor]);
     
     return (
         <div ref={canvaContainerRef} style={{ width:'100%', height:'100%', position: 'absolute' }}>
@@ -68,4 +61,4 @@ const Spotlight = () => {
     );
 };
 
-export default Spotlight;
+export default CursorComponent;

@@ -1,4 +1,4 @@
-.corner_mark {
+.corner-mark {
     position: absolute;
     width: 100%;
     height: 100%;
@@ -7,8 +7,8 @@
     align-items: flex-start;
 
     .mark {
-        height: 100px;
-        width: 100px;
+        height: 150px;
+        width: 150px;
         z-index: 100;
         transition: background-color 1s ease-in-out;
     }
@@ -45,6 +45,15 @@
         .title {
             font-size: 50px;
             opacity: 30%;
+            display: flex;
+
+            background: red;
+            justify-content: center;
+
+            .button {
+                width: 300px;
+                height: 300px;
+            }
         }
 
         .animated-border {
@@ -69,7 +78,7 @@
                 background-repeat: no-repeat;
                 background-size: 50% 50%, 50% 50%;
                 background-position: 0 0, 100% 0, 100% 100%, 0 100%;
-                background-image: linear-gradient(green, green), linear-gradient(black, black), linear-gradient(green, green), linear-gradient(black, black);
+                background-image: linear-gradient(purple, blue), linear-gradient(blue, purple), linear-gradient(purple, blue), linear-gradient(blue, purple);
                 animation: rotate 4s linear infinite;
             }
             
@@ -81,9 +90,9 @@
                 top: 6px;
                 width: calc(100% - 12px);
                 height: calc(100% - 12px);
-                background: black;
                 border-radius: 15px;
                 animation: opacityChange 3s infinite alternate;
+                background: #383838;
             }
         }
     }

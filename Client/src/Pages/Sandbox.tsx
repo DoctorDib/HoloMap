@@ -6,10 +6,11 @@ import DisplayComponent from '../Components/Display';
 import Spotlight from '../Components/QR/Spotlight';
 import CornerMarkComponent from '../Components/CornerMark';
 import CommandButtonsComponent from '../Components/CommandButtons';
+import CursorComponent from '../Components/Cursor';
 
 const SandboxPage = (): React.ReactElement => {
     return (<>
-        <div className={'sandbox'}  >
+        <div className={'sandbox'}>
             
             <DisplayComponent content={
                 (<>
@@ -18,11 +19,13 @@ const SandboxPage = (): React.ReactElement => {
                         <div className={'text'}> Project HOLOMAP: Sandbox </div>
                     </div>
 
-                    <CornerMarkComponent/>
-
-                    <Spotlight/>
                     
+
                     <CommandButtonsComponent/>
+                    <CursorComponent/>
+                    <Spotlight/>
+
+                    <CornerMarkComponent/>
                 </>)
             }/>
         </div>

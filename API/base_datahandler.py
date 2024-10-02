@@ -161,7 +161,7 @@ class BaseDataHandler:
         try:
             limit = "" if _limit is None else "LIMIT {0}".format(_limit)
             where_condition = self.format_where_condition(_where_condition)
-            print(">>>>>", 'SELECT {0} FROM {1} {2} {3}'.format(_key, _class._table, where_condition, limit))
+            # print(">>>>>", 'SELECT {0} FROM {1} {2} {3}'.format(_key, _class._table, where_condition, limit))
             results = self.command.execute('SELECT {0} FROM {1} {2} {3}'.format(_key, _class._table, where_condition, limit))
             if (get_multiple):
                 return results.fetchall()
@@ -171,7 +171,7 @@ class BaseDataHandler:
 
     def insert_data(self, _class : any, _columns : list[str], _values : list[object]):
         try:
-            print('INSERT INTO {0} {1} VALUES {2}'.format(_class._table, _columns, _values))
+            # print('INSERT INTO {0} {1} VALUES {2}'.format(_class._table, _columns, _values))
             self.command.execute('INSERT INTO {0} {1} VALUES {2}'.format(_class._table, _columns, _values))
             self.connection.commit()
         except sqlite3.Error as er:
@@ -179,7 +179,7 @@ class BaseDataHandler:
 
     def insert_update(self, _class : any, _columns, _values):
         try:
-            print('INSERT OR REPLACE INTO {0} {1} VALUES {2}'.format(_class._table, _columns, _values))
+            # print('INSERT OR REPLACE INTO {0} {1} VALUES {2}'.format(_class._table, _columns, _values))
             self.command.execute('INSERT OR REPLACE INTO {0} {1} VALUES {2}'.format(_class._table, _columns, _values))
             self.connection.commit()
         except sqlite3.Error as er:

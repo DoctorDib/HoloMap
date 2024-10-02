@@ -7,6 +7,7 @@ const initialResultState : RootTypes = {
     settings: {},
     socket: undefined,
     qr: undefined,
+    cursor: undefined,
 };
 
 const reducer = (state = initialResultState, action: any = { }) => { // TODO - Better action types?
@@ -45,9 +46,8 @@ const reducer = (state = initialResultState, action: any = { }) => { // TODO - B
         default:
             return { ...newState };
 
-
+        // QR
         case DataActionEnum.QR_SetDetectionList:
-            // console.log(state);
             return {
                 ...state,
                 qr: {
@@ -56,12 +56,34 @@ const reducer = (state = initialResultState, action: any = { }) => { // TODO - B
                 },
             };
         case DataActionEnum.QR_EmptyDetectionList:
-            // console.log(state);
             return {
                 ...state,
                 qr: {
                     ... state.qr,
                     detected_qrs: [],
+                },
+            };
+
+        // Cursor
+        case DataActionEnum.Cursor_Set:
+            if (action.data.data[0] === null)
+                return;
+
+            return {
+                ...state,
+                cursor: {
+                    ... state.cursor,
+                    x: action.data.data[0][0], // x
+                    y: action.data.data[0][1], // y
+                },
+            };
+        case DataActionEnum.Cursor_Reset:
+            return {
+                ...state,
+                cursor: {
+                    ... state.cursor,
+                    x: null, 
+                    y: null,
                 },
             };
     }

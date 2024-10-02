@@ -39,60 +39,34 @@ class Calibration_Module(ModuleHelper):
         # 3 = bottom left
         self.marker_position: int = 0
 
-        # Define the HSV range for detecting the specific red color
-        # Red color can be in two ranges due to the hue wrap-around in HSV color space
-        tolerance = 4  # Adjust this value for sensitivity
+        # Define lower and uppper limits
+        # +-15% of S and V, +-60 on H
+        #226,220,85 => 226/2,86%,33% = 113,0.86*255,0.33*255
+        self.lower_red1 = np.array([0, 150, 150], np.uint8)  # Lower bound for the darkest red
+        self.upper_red1 = np.array([0, 255, 255], np.uint8)   # Upper bound for the lightest red
 
-        # Lower red range (0-10 degrees on the Hue scale)
-        self.red_lower1 = np.array([0, 120, 70])
-        self.red_upper1 = np.array([tolerance, 255, 255])
+        # Additional mask for upper red hues
+        self.lower_red2 = np.array([170, 115, 115], np.uint8)  # Adjust this if necessary
+        self.upper_red2 = np.array([180, 255, 255], np.uint8)  # Adjust this if necessary
 
-        # Upper red range (170-180 degrees on the Hue scale)
-        self.red_lower2 = np.array([180 - tolerance, 120, 70])
-        self.red_upper2 = np.array([180, 255, 255])
+        # self.red_lower1 = np.array([0, 50, 50], np.uint8)  # Much broader range for hue, saturation, and value
+        # self.red_upper1 = np.array([180, 255, 255], np.uint8)
 
+        # self.red_lower2 = np.array([170, 50, 50], np.uint8)  # Another range for red
+        # self.red_upper2 = np.array([180, 255, 255], np.uint8)
+        
         # Morphological Transform, Dilation
         # for each color and bitwise_and operator
         # between imageFrame and mask determines
         # to detect only that particular color
-        self.kernal = np.ones((5, 5), "uint8")
+        # self.kernal = np.ones((5, 5), "uint8")
 
         self.loop_count = 0
-        self.loop_limit = 3
+        self.loop_limit = 1
 
         self.sleep_time = 5 # seconds
 
         self.outlier_detection = CalibrationOutlierDetection()
-
-    def set_up_frame(self):
-        """
-        Sets up the frame by linking it to the shared memory buffer.
-
-        Returns:
-            np.ndarray: The frame as a NumPy array.
-        """
-        # Ensure the buffer is large enough for the image
-        buffer_size = np.prod(self.image_shape)
-        if len(self.parent_memory.buf) < buffer_size:
-            raise ValueError("Buffer size is too small for the image. Ensure the shared memory size is correct.")
-
-        self.frame = np.ndarray((1080, 1920, 3), dtype=np.uint8, buffer=self.parent_memory.buf)
-        logger.info(f"Attempting to set up Camera")
-        
-        return self.frame
-    
-    def receive_image(self):
-        """
-        Receives the image from the shared memory buffer.
-
-        Returns:
-            np.ndarray or None: The image frame if available; otherwise, None.
-        """
-        if self.frame is not None and self.frame.size > 0 and not np.all(self.frame) and np.any(self.frame):
-            return self.frame
-        else:
-            self.set_up_frame()
-            return None
 
     def run(self):
         """
@@ -127,26 +101,8 @@ class Calibration_Module(ModuleHelper):
                         if (img is None):
                             continue
 
-                        with DebugModeFlagFactory(self.shared_state, read_only=True) as flag_state:
-                            if (flag_state.value):
-                                with BoundaryBoxFactory(self.shared_state) as boundary_state:
-                                    # Drawing boundaries
-                                    img = boundary_state.value.draw_boundary(img)
+                        cv2.waitKey(1)
 
-                                    font = cv2.FONT_HERSHEY_SIMPLEX
-                                    fontScale = 1
-                                    color = (0, 255, 0)
-                                    thickness = 2
-                                    
-                                    # Adding infor for the boundaries
-                                    img = cv2.putText(img, 'Top Left: ' + str(boundary_state.value.top_left), (500, 900), font, fontScale, color, thickness, cv2.LINE_AA)
-                                    img = cv2.putText(img, 'Top Right: ' + str(boundary_state.value.top_right), (500, 950), font, fontScale, color, thickness, cv2.LINE_AA)
-                                    img = cv2.putText(img, 'Bottom Right: ' + str(boundary_state.value.bottom_right), (500, 1000), font, fontScale, color, thickness, cv2.LINE_AA)
-                                    img = cv2.putText(img, 'Bottom Left: ' + str(boundary_state.value.bottom_left), (500, 1050), font, fontScale, color, thickness, cv2.LINE_AA)
-
-                            with CameraFactory("calibration_camera", self.shared_state) as calibration_camera:
-                                calibration_camera.value = img
-                            cv2.waitKey(1)
 
                 except Exception as e:
                     logger.error("Calibration Error: ", e)
@@ -203,7 +159,7 @@ class Calibration_Module(ModuleHelper):
         if (not success):
             # If not successful, try it again!
             return None
-
+        
         # Can only go between 0 and 3
         if (self.marker_position < 3):
             self.marker_position += 1
@@ -236,32 +192,84 @@ class Calibration_Module(ModuleHelper):
         # HSV(hue-saturation-value)
         # color space
         hsv_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-
+        
         # Apply red mask
         # Create masks for both red ranges
-        mask1 = cv2.inRange(hsv_frame, self.red_lower1, self.red_upper1)
-        mask2 = cv2.inRange(hsv_frame, self.red_lower2, self.red_upper2)
+        mask1 = cv2.inRange(hsv_frame, self.lower_red1, self.upper_red1)
+        mask2 = cv2.inRange(hsv_frame, self.lower_red2, self.upper_red2)
+
+        red_mask = cv2.bitwise_or(mask1, mask2)
+
+        # Apply Gaussian blur to smooth the mask
+        red_mask = cv2.GaussianBlur(red_mask, (5, 5), 0)
+
+        # red_mask = mask1 | mask2
+
+        # Morphological Transform, Dilation
+        # for each color and bitwise_and operator
+        # between imageFrame and mask determines
+        # to detect only that particular color
+        kernel = np.ones((5, 5), "uint8")
+        red_mask = cv2.morphologyEx(red_mask, cv2.MORPH_CLOSE, kernel)
+        red_mask = cv2.morphologyEx(red_mask, cv2.MORPH_OPEN, kernel)
         
-        # Combine masks
-        mask = cv2.bitwise_or(mask1, mask2)
+        # For red color
+        # red_mask = cv2.dilate(red_mask, kernel)
+
+        # save results
+        with DebugModeFlagFactory(self.shared_state, read_only=True) as flag_state:
+            if (flag_state.value):
+                with CameraFactory("calibration_mask_camera", self.shared_state) as camera:
+                    camera.value = red_mask
         
         # Creating contour to track red color
-        contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        contours, _ = cv2.findContours(red_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
         if (len(contours) <= 0):
             return None
-
-        largest_contour = max(contours, key=cv2.contourArea)
         
-        area = cv2.contourArea(largest_contour)
-        if area > 300:
-            x, y, w, h = cv2.boundingRect(largest_contour)
-            
-            # Drawing them out
-            frame = cv2.circle(frame, (x, y), 10, (255, 0, 255), 2)
-            frame = cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 0, 255), 2)
+        # Draw contours on the original frame
+        for contour in contours:
+            cv2.drawContours(frame, [contour], -1, (0, 255, 255), 2)  # Yellow color in BGR (0, 255, 255)
 
-            return ((x, y), (w, h))
+        # largest_contour = max(contours, key=cv2.contourArea)
+        
+        for contour in contours:
+            area = cv2.contourArea(contour)
+            print("================")
+            print(f"AREA : {area}")
+            if area > 1000 and area < 5000:  # Use the adjustable minimum area
+                perimeter = cv2.arcLength(contour, True)
+                approx = cv2.approxPolyDP(contour, 0.02 * perimeter, True)
+
+                cv2.drawContours(frame, [approx], 0, (0, 255, 0), 3)  # Draw bounding box
+                x, y, w, h = cv2.boundingRect(approx)
+                
+                # Drawing them out
+                frame = cv2.circle(frame, (x, y), 10, (255, 0, 255), 2)
+                frame = cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 0, 255), 2)
+
+                with DebugModeFlagFactory(self.shared_state, read_only=True) as flag_state:
+                    if (flag_state.value):
+                        with BoundaryBoxFactory(self.shared_state) as boundary_state:
+                            # Drawing boundaries
+                            frame = boundary_state.value.draw_boundary(frame)
+
+                            # font = cv2.FONT_HERSHEY_SIMPLEX
+                            # fontScale = 1
+                            # color = (0, 255, 0)
+                            # thickness = 2
+                            
+                            # Adding infor for the boundaries
+                            # frame = cv2.putText(frame, 'Top Left: ' + str(boundary_state.value.top_left), (500, 900), font, fontScale, color, thickness, cv2.LINE_AA)
+                            # frame = cv2.putText(frame, 'Top Right: ' + str(boundary_state.value.top_right), (500, 950), font, fontScale, color, thickness, cv2.LINE_AA)
+                            # frame = cv2.putText(frame, 'Bottom Right: ' + str(boundary_state.value.bottom_right), (500, 1000), font, fontScale, color, thickness, cv2.LINE_AA)
+                            # frame = cv2.putText(frame, 'Bottom Left: ' + str(boundary_state.value.bottom_left), (500, 1050), font, fontScale, color, thickness, cv2.LINE_AA)
+
+                            with CameraFactory("calibration_camera", self.shared_state) as calibration_camera:
+                                calibration_camera.value = frame
+
+                return ((x, y), (w, h))
         
         # If we have reached this point then something has gone wrong
         return None

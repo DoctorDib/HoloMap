@@ -1,7 +1,7 @@
 from multiprocessing import Queue
 import multiprocessing
 import os
-from API.shared_state import CameraFactory, DebugModeFlagFactory
+from API.shared_state import BoundaryBoxFactory, CameraFactory, DebugModeFlagFactory
 import cv2
 from flask import Flask
 import numpy as np
@@ -33,8 +33,13 @@ class Vision_Module(ModuleHelper):
         self.detector.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'))
 
         # Screen friendly
-        self.detector.set(cv2.CAP_PROP_AUTO_WB, 0)  # Disable auto white balance
-        self.detector.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.4)  # Disable auto exposure (0.25 is manual mode, 0.75 is auto)
+        # self.detector.set(cv2.CAP_PROP_AUTO_WB, 0)  # Disable auto white balance
+        # self.detector.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.4)  # Disable auto exposure (0.25 is manual mode, 0.75 is auto)
+
+        # Disable auto-exposure
+        # self.detector.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.25)  # This might vary depending on your webcam model
+        # Manually set exposure (experiment with values)
+        # self.detector.set(cv2.CAP_PROP_EXPOSURE, -5)  # Lower values mean shorter exposure
 
         # Manually set exposure and white balance if needed
         # self.detector.set(cv2.CAP_PROP_EXPOSURE, -5)  # Adjust this value as needed
@@ -58,9 +63,11 @@ class Vision_Module(ModuleHelper):
 
                 with DebugModeFlagFactory(self.shared_state, read_only=True) as flag_state:
                     if img is not None and flag_state.value:
-                        with CameraFactory("main_camera", self.shared_state) as camera_state:
-                            camera_state.value = img
-                        cv2.waitKey(1)
+                        with BoundaryBoxFactory(self.shared_state, read_only=True) as boundary_state:
+                            img = boundary_state.value.draw_boundary(img)
+                            with CameraFactory("main_camera", self.shared_state) as camera_state:
+                                camera_state.value = img
+                cv2.waitKey(1)
 
         except Exception as e:
             logger.error(e)

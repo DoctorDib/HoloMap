@@ -1,7 +1,8 @@
 from multiprocessing import Queue
 import multiprocessing
 from time import sleep
-from API.shared_state import BoundaryBoxFactory, CalibrationFlagFactory, CameraFactory
+from API.shared_state import BoundaryBoxFactory, CalibrationFlagFactory, CameraFactory, DebugModeFlagFactory
+from Common.KalmanFilter import KalmanFilter
 from flask import Flask
 
 import os, cv2
@@ -31,26 +32,10 @@ class QR_Module(ModuleHelper):
 
         self.detected_qr = False
 
+        self.kalman_filter = KalmanFilter(process_variance=1e-5, measurement_variance=1e-2)
+
     def prep(self):
         self.detector = QRDetector(model_size='n', conf_th=.35)
-
-    def set_up_frame(self):
-        # Ensure the buffer is large enough for the image
-        buffer_size = np.prod(self.image_shape)
-        if len(self.parent_memory.buf) < buffer_size:
-            raise ValueError("Buffer size is too small for the image. Ensure the shared memory size is correct.")
-
-        self.frame = np.ndarray((1080, 1920, 3), dtype=np.uint8, buffer=self.parent_memory.buf)
-        logger.info(f"Attempting to set up Camera")
-        
-        return self.frame
-    
-    def receive_image(self):
-        if self.frame is not None and self.frame.size > 0 and not np.all(self.frame) and np.any(self.frame):
-            return self.frame
-        else:
-            self.set_up_frame()
-            return None
 
     def new_qr(self, img):
         val = self.detector.detect_and_decode(image=img, is_bgr=True)
@@ -123,20 +108,36 @@ class QR_Module(ModuleHelper):
                             else:
                                 self.detection_counter += 1
 
+                        # Use get_real_coords to transform the quad coordinates
                         out = boundary_state.value.get_real_coords(detected[0]["quad_xy"], img.shape[1], img.shape[0])
 
+                        # Kalman filter processing using the transformed coordinates
+                        real_center = np.mean(out, axis=0)  # Find the center from the transformed coordinates
+                        self.kalman_filter.predict()  # Predict the next state
+                        self.kalman_filter.update(real_center)  # Update with the measurement
+                        estimated_position = self.kalman_filter.get_estimate()  # Get the estimated position
+
+                        # Adjust 'out' coordinates based on the smoothed estimated_position
+                        offset = estimated_position - real_center  # Calculate the offset from the real center to the estimated position
+                        smoothed_out = out + offset  # Apply the offset to all points in 'out'
+
+
                         cv2.rectangle(img, (x1, y1), (x2, y2), color=(0, 255, 0), thickness=2)
+                        cv2.circle(img, tuple(estimated_position.astype(int)), radius=5, color=(255, 0, 0), thickness=-1)
+
 
                         self.detected_qr = True
 
                         self.output.put({ 
                             "name": "Detected QR", 
                             "tag": "QR_DETECTION", 
-                            "data": [out]
+                            "data": [smoothed_out] # TODO - Array because there will be more than one QR in future
                         })
         
-                        with CameraFactory("qr_camera", self.shared_state) as camera_state:
-                            camera_state.value = img
+                        with DebugModeFlagFactory(self.shared_state, read_only=True) as flag_state:
+                            if (flag_state.value):
+                                with CameraFactory("qr_camera", self.shared_state) as camera_state:
+                                    camera_state.value = img
                         cv2.waitKey(1)
                     
                 except Exception as e:
