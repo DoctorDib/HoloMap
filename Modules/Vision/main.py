@@ -1,6 +1,7 @@
 from multiprocessing import Queue
 import multiprocessing
 import os
+from time import sleep
 from API.shared_state import BoundaryBoxFactory, CameraFactory, DebugModeFlagFactory
 import cv2
 from flask import Flask
@@ -29,12 +30,12 @@ class Vision_Module(ModuleHelper):
 
         self.detector.set(cv2.CAP_PROP_FRAME_WIDTH, self.config.get_int("RESOLUTION_WIDTH"))
         self.detector.set(cv2.CAP_PROP_FRAME_HEIGHT, self.config.get_int("RESOLUTION_HEIGHT"))
-        self.detector.set(cv2.CAP_PROP_FPS, self.config.get_int("FPS"))
-        self.detector.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'))
+        # self.detector.set(cv2.CAP_PROP_FPS, self.config.get_int("FPS"))
+        # self.detector.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'))
 
         # Screen friendly
-        # self.detector.set(cv2.CAP_PROP_AUTO_WB, 0)  # Disable auto white balance
-        # self.detector.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.4)  # Disable auto exposure (0.25 is manual mode, 0.75 is auto)
+        self.detector.set(cv2.CAP_PROP_AUTO_WB, 0)  # Disable auto white balance
+        self.detector.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.4)  # Disable auto exposure (0.25 is manual mode, 0.75 is auto)
 
         # Disable auto-exposure
         # self.detector.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.25)  # This might vary depending on your webcam model

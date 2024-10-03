@@ -8,7 +8,7 @@ import { projectorSetEdit, webcamSetEdit } from '../../DataHandler/Calibration/A
 
 const CornerMarkComponent = (): React.ReactElement => {
     // Constant values
-    const incrementValue = 15; // Value to increment markRedness by
+    const incrementValue = 0.1; // Value to increment markRedness by
     const interval = 500; // Time interval in milliseconds (1000ms = 1 second)
 
     const webcamEdit: boolean = useSelector((state: StateTypes): boolean => state.calibrations.webcam.edit);
@@ -49,7 +49,7 @@ const CornerMarkComponent = (): React.ReactElement => {
 
     // Ensuring it'll keep attempting redness
     useEffect(() => {
-        if (markRedness >= 255)
+        if (markRedness >= 1)
             setMarkRedness(0);
     }, [markRedness]);
 
@@ -66,7 +66,7 @@ const CornerMarkComponent = (): React.ReactElement => {
 
         const intervalId = setInterval(() => {
             console.log(markRedness);
-            setMarkRedness((prev) => Math.min(prev + incrementValue, 255)); // Increment markRedness, max is 255
+            setMarkRedness((prev) => Math.min(prev + incrementValue, 1)); // Increment markRedness, max is 255
         }, interval);
 
         return () => clearInterval(intervalId);
@@ -99,7 +99,7 @@ const CornerMarkComponent = (): React.ReactElement => {
         {/* Mark visible when aligning webcam border with new projector border */}
         {
             webcamEdit ? (<>
-                <div className={'mark'} style={{ backgroundColor: `rgb(${markRedness}, 0, 0)` }}/>
+                <img src={'http://' + window.location.host + '/ArUco.png'} className={'mark'} style={{ opacity: markRedness }} />
             </>) : null
         }
     </div>;

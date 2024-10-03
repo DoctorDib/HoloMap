@@ -7,6 +7,7 @@ import logger
 import numpy as np
 import multiprocessing
 import multiprocessing.managers
+import cv2.aruco as aruco
 
 from Common.ModuleHelper import ModuleHelper
 from Modules.Vision.BoundaryBox import BoundaryBox
@@ -32,34 +33,12 @@ class Calibration_Module(ModuleHelper):
         self.image_shape = image_shape
         self.frame = None
 
-        # Controlling the UI red marker box
+        # Controlling the UI ArUco marker box
         # 0 = top left
         # 1 = top right
         # 2 = bottom right
         # 3 = bottom left
         self.marker_position: int = 0
-
-        # Define lower and uppper limits
-        # +-15% of S and V, +-60 on H
-        #226,220,85 => 226/2,86%,33% = 113,0.86*255,0.33*255
-        self.lower_red1 = np.array([0, 150, 150], np.uint8)  # Lower bound for the darkest red
-        self.upper_red1 = np.array([0, 255, 255], np.uint8)   # Upper bound for the lightest red
-
-        # Additional mask for upper red hues
-        self.lower_red2 = np.array([170, 115, 115], np.uint8)  # Adjust this if necessary
-        self.upper_red2 = np.array([180, 255, 255], np.uint8)  # Adjust this if necessary
-
-        # self.red_lower1 = np.array([0, 50, 50], np.uint8)  # Much broader range for hue, saturation, and value
-        # self.red_upper1 = np.array([180, 255, 255], np.uint8)
-
-        # self.red_lower2 = np.array([170, 50, 50], np.uint8)  # Another range for red
-        # self.red_upper2 = np.array([180, 255, 255], np.uint8)
-        
-        # Morphological Transform, Dilation
-        # for each color and bitwise_and operator
-        # between imageFrame and mask determines
-        # to detect only that particular color
-        # self.kernal = np.ones((5, 5), "uint8")
 
         self.loop_count = 0
         self.loop_limit = 1
@@ -67,6 +46,13 @@ class Calibration_Module(ModuleHelper):
         self.sleep_time = 5 # seconds
 
         self.outlier_detection = CalibrationOutlierDetection()
+
+    def prep(self):
+        self.dictionary = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_100)
+        self.parameters =  cv2.aruco.DetectorParameters()
+        self.detector = cv2.aruco.ArucoDetector(self.dictionary, self.parameters)
+
+        super().prep()
 
     def run(self):
         """
@@ -133,7 +119,7 @@ class Calibration_Module(ModuleHelper):
 
     def process_frame(self, frame):
         """
-        Processes the given frame to detect the red box and update the marker position.
+        Processes the given frame to detect the aruco marker and update the marker position.
 
         Args:
             frame (np.ndarray): The image frame to be processed.
@@ -142,20 +128,14 @@ class Calibration_Module(ModuleHelper):
             np.ndarray or None: The processed frame if successful; otherwise, None.
         """
 
-        # Detect red box
-        coords_and_size = self.detect_red_box(frame)
-        if (coords_and_size is None):
+        # Detect aruco marker
+        coords = self.detect_aruco(frame)
+        if (coords is None):
             # If not successful, try it again!
             return None
         
-        print("-===============================-")
-        print("-===============================-")
-        print("-===============================-")
-        print("-===============================-")
-        print(coords_and_size)
-
         # Process coords
-        success = self.process_coords(coords_and_size)
+        success = self.process_coords(coords)
         if (not success):
             # If not successful, try it again!
             return None
@@ -176,146 +156,88 @@ class Calibration_Module(ModuleHelper):
 
         return frame
 
-    def detect_red_box(self, frame) -> any:
+    def detect_aruco(self, frame) -> any:
         """
-        Detects the red box in the given frame using HSV color space.
+        Detects the ArUco marker in the given frame using HSV color space.
 
         Args:
-            frame (np.ndarray): The image frame in which to detect the red box.
+            frame (np.ndarray): The image frame in which to detect the aruco marker.
 
         Returns:
-            tuple or None: The coordinates and size of the red box if detected; otherwise, None.
+            tuple or None: The coordinates and size of the aruco marker if detected; otherwise, None.
         """
 
         # Convert the imageFrame in
         # BGR(RGB color space) to
         # HSV(hue-saturation-value)
         # color space
-        hsv_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-        
-        # Apply red mask
-        # Create masks for both red ranges
-        mask1 = cv2.inRange(hsv_frame, self.lower_red1, self.upper_red1)
-        mask2 = cv2.inRange(hsv_frame, self.lower_red2, self.upper_red2)
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+       
+        corners, ids, _ = aruco.detectMarkers(gray, self.dictionary, parameters=self.parameters)
 
-        red_mask = cv2.bitwise_or(mask1, mask2)
+        # If markers are detected, draw them
+        if ids is not None and len(ids) == 1 and ids[0] == 0: # TODO - Find a way to not have to hardcode the ArUco marker ID
+            # Draw the detected markers and their IDs on the frame
+            frame = aruco.drawDetectedMarkers(frame, corners, ids)
+            
+            # We only care about one of them
+            corners = corners[0][0]
 
-        # Apply Gaussian blur to smooth the mask
-        red_mask = cv2.GaussianBlur(red_mask, (5, 5), 0)
+            with DebugModeFlagFactory(self.shared_state, read_only=True) as flag_state:
+                if (flag_state.value):
+                    with BoundaryBoxFactory(self.shared_state) as boundary_state:
+                        # Drawing boundaries
+                        frame = boundary_state.value.draw_boundary(frame)
 
-        # red_mask = mask1 | mask2
+                        # font = cv2.FONT_HERSHEY_SIMPLEX
+                        # fontScale = 1
+                        # color = (0, 255, 0)
+                        # thickness = 2
+                        
+                        # Adding infor for the boundaries
+                        # frame = cv2.putText(frame, 'Top Left: ' + str(boundary_state.value.top_left), (500, 900), font, fontScale, color, thickness, cv2.LINE_AA)
+                        # frame = cv2.putText(frame, 'Top Right: ' + str(boundary_state.value.top_right), (500, 950), font, fontScale, color, thickness, cv2.LINE_AA)
+                        # frame = cv2.putText(frame, 'Bottom Right: ' + str(boundary_state.value.bottom_right), (500, 1000), font, fontScale, color, thickness, cv2.LINE_AA)
+                        # frame = cv2.putText(frame, 'Bottom Left: ' + str(boundary_state.value.bottom_left), (500, 1050), font, fontScale, color, thickness, cv2.LINE_AA)
 
-        # Morphological Transform, Dilation
-        # for each color and bitwise_and operator
-        # between imageFrame and mask determines
-        # to detect only that particular color
-        kernel = np.ones((5, 5), "uint8")
-        red_mask = cv2.morphologyEx(red_mask, cv2.MORPH_CLOSE, kernel)
-        red_mask = cv2.morphologyEx(red_mask, cv2.MORPH_OPEN, kernel)
-        
-        # For red color
-        # red_mask = cv2.dilate(red_mask, kernel)
-
-        # save results
-        with DebugModeFlagFactory(self.shared_state, read_only=True) as flag_state:
-            if (flag_state.value):
-                with CameraFactory("calibration_mask_camera", self.shared_state) as camera:
-                    camera.value = red_mask
-        
-        # Creating contour to track red color
-        contours, _ = cv2.findContours(red_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-
-        if (len(contours) <= 0):
-            return None
-        
-        # Draw contours on the original frame
-        for contour in contours:
-            cv2.drawContours(frame, [contour], -1, (0, 255, 255), 2)  # Yellow color in BGR (0, 255, 255)
-
-        # largest_contour = max(contours, key=cv2.contourArea)
-        
-        for contour in contours:
-            area = cv2.contourArea(contour)
-            print("================")
-            print(f"AREA : {area}")
-            if area > 1000 and area < 5000:  # Use the adjustable minimum area
-                perimeter = cv2.arcLength(contour, True)
-                approx = cv2.approxPolyDP(contour, 0.02 * perimeter, True)
-
-                cv2.drawContours(frame, [approx], 0, (0, 255, 0), 3)  # Draw bounding box
-                x, y, w, h = cv2.boundingRect(approx)
-                
-                # Drawing them out
-                frame = cv2.circle(frame, (x, y), 10, (255, 0, 255), 2)
-                frame = cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 0, 255), 2)
-
-                with DebugModeFlagFactory(self.shared_state, read_only=True) as flag_state:
-                    if (flag_state.value):
-                        with BoundaryBoxFactory(self.shared_state) as boundary_state:
-                            # Drawing boundaries
-                            frame = boundary_state.value.draw_boundary(frame)
-
-                            # font = cv2.FONT_HERSHEY_SIMPLEX
-                            # fontScale = 1
-                            # color = (0, 255, 0)
-                            # thickness = 2
-                            
-                            # Adding infor for the boundaries
-                            # frame = cv2.putText(frame, 'Top Left: ' + str(boundary_state.value.top_left), (500, 900), font, fontScale, color, thickness, cv2.LINE_AA)
-                            # frame = cv2.putText(frame, 'Top Right: ' + str(boundary_state.value.top_right), (500, 950), font, fontScale, color, thickness, cv2.LINE_AA)
-                            # frame = cv2.putText(frame, 'Bottom Right: ' + str(boundary_state.value.bottom_right), (500, 1000), font, fontScale, color, thickness, cv2.LINE_AA)
-                            # frame = cv2.putText(frame, 'Bottom Left: ' + str(boundary_state.value.bottom_left), (500, 1050), font, fontScale, color, thickness, cv2.LINE_AA)
-
-                            with CameraFactory("calibration_camera", self.shared_state) as calibration_camera:
-                                calibration_camera.value = frame
-
-                return ((x, y), (w, h))
-        
+                        with CameraFactory("calibration_camera", self.shared_state) as calibration_camera:
+                            calibration_camera.value = frame
+            
+            return (corners[0], corners[1], corners[2], corners[3])
+            
         # If we have reached this point then something has gone wrong
         return None
 
-    def process_coords(self, coords_and_size: any) -> bool:
+    def process_coords(self, coords: any) -> bool:
         """
-        Processes the coordinates and size of the detected red box to update the boundary box.
+        Processes the coordinates and size of the detected arcuo marker to update the boundary box.
 
         Args:
-            coords_and_size (any): Coordinates and size of the detected red box.
+            coords (any): Coordinates detected ArUco.
 
         Returns:
             bool: True if coordinates were successfully processed; otherwise, False.
 
         Dev Note:
-            The coordinates are always based on the top left corner of the red marker
+            Coords is a tuple of 4 tuples: (top left, top right, bottom right, bottom left)
         """
 
-        # TODO - Implement a cycle property to go through the calibration process x times
         # TODO - Implement an average which uses the cycle 
 
         try:
-            marker_x = coords_and_size[0][0]
-            marker_y = coords_and_size[0][1]
-            marker_width = coords_and_size[1][0]
-            marker_height = coords_and_size[1][1]
-
             with BoundaryBoxFactory(self.shared_state) as boundary_state:
                 # Top left condition
                 if (self.marker_position == 0):
-                    boundary_state.value.insert(0, (marker_x, marker_y))
+                    boundary_state.value.insert(0, coords[0])
                 # Top right condition
                 elif (self.marker_position == 1):
-                    x = marker_x + marker_width
-                    y = marker_y
-                    boundary_state.value.insert(1, (x, y))
+                    boundary_state.value.insert(1, coords[1])
                 # Bottom right condition
                 elif (self.marker_position == 2):
-                    x = marker_x + marker_width
-                    y = marker_y + marker_height
-                    boundary_state.value.insert(2, (x, y))
+                    boundary_state.value.insert(2, coords[2])
                 # Bottom left condition
                 elif (self.marker_position == 3):
-                    x = marker_x
-                    y = marker_y + marker_height
-                    boundary_state.value.insert(3, (x, y))
+                    boundary_state.value.insert(3, coords[3])
 
             return True
         except Exception as ex:

@@ -78,7 +78,7 @@
                 background-repeat: no-repeat;
                 background-size: 50% 50%, 50% 50%;
                 background-position: 0 0, 100% 0, 100% 100%, 0 100%;
-                background-image: linear-gradient(purple, blue), linear-gradient(blue, purple), linear-gradient(purple, blue), linear-gradient(blue, purple);
+                background-image: linear-gradient(yellow, blue), linear-gradient(yellow, blue), linear-gradient(yellow, blue), linear-gradient(yellow, blue);
                 animation: rotate 4s linear infinite;
             }
             
@@ -92,7 +92,7 @@
                 height: calc(100% - 12px);
                 border-radius: 15px;
                 animation: opacityChange 3s infinite alternate;
-                background: #383838;
+                background: #333333;
             }
         }
     }

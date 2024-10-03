@@ -32,7 +32,7 @@ class QR_Module(ModuleHelper):
 
         self.detected_qr = False
 
-        self.kalman_filter = KalmanFilter(process_variance=1e-5, measurement_variance=1e-2)
+        self.kalman_filter = KalmanFilter(process_variance=1e-2, measurement_variance=1e-2)
 
     def prep(self):
         self.detector = QRDetector(model_size='n', conf_th=.35)

@@ -40,10 +40,10 @@ class Hands_Module(ModuleHelper):
 
                     hand1_positions = self.detector.getPosition(img, range(21), draw=True)
 
-                    with BoundaryBoxFactory(self.shared_state, read_only=True) as boundary_state:
-                        frame = boundary_state.value.draw_boundary(img)
+                    if (len(hand1_positions) > 0):
+                        with BoundaryBoxFactory(self.shared_state, read_only=True) as boundary_state:
+                            frame = boundary_state.value.draw_boundary(img)
 
-                        if (len(hand1_positions) > 0):
                             # Get the position of the index finger tip (key point)
                             finger_tip = np.array(hand1_positions[8][:2])  # x, y
 
@@ -74,9 +74,6 @@ class Hands_Module(ModuleHelper):
                             if (flag_state.value):
                                 with CameraFactory("hands_camera", self.shared_state) as camera_state:
                                     camera_state.value = frame
-
-                                    cv2.imshow("Image", frame)
-                                    cv2.waitKey(1)
 
                 except Exception as e:
                     logger.error("Uhh Ohh, e", e)
