@@ -59,6 +59,10 @@ const DataActionEnum = {
     // Cursor
     Cursor_Set: 61,
     Cursor_Reset: 62,
+
+    // ArUco
+    ArUco_SetDetectionList: 70,
+    ArUco_EmptyDetectionList: 71,
 };
 
 const NotificationActionEnums = {
