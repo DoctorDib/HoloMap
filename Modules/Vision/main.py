@@ -1,7 +1,6 @@
 from multiprocessing import Queue
 import multiprocessing
 import os
-from time import sleep
 from API.shared_state import BoundaryBoxFactory, CameraFactory, DebugModeFlagFactory
 import cv2
 from flask import Flask
@@ -11,7 +10,7 @@ import logger
 from Common.ModuleHelper import ModuleHelper
 
 class Vision_Module(ModuleHelper):
-    def __init__(self, memory_name: str = None, memory_size: int = 1920 * 1080 * 3,
+    def __init__(self, memory_name: str = None, memory_size: int = None,
                 app: Flask = None, output: Queue = None, shared_state: multiprocessing.managers.SyncManager.dict = None):
 
         self.base_folder_path = os.path.dirname(os.path.abspath(__file__)) + "\\Modules"

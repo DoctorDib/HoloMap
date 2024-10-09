@@ -15,7 +15,7 @@ import cv2.aruco as aruco
 from Common.ModuleHelper import ModuleHelper
 
 class ArUco_Module(ModuleHelper):
-    def __init__(self, memory_name: str, image_shape=(1080, 1920, 3), app: Flask = None, output: Queue = None, shared_state: multiprocessing.managers.SyncManager.dict = None):
+    def __init__(self, memory_name: str, image_shape, app: Flask = None, output: Queue = None, shared_state: multiprocessing.managers.SyncManager.dict = None):
         super().__init__("QR", parent_memory_name=memory_name, app=app, output=output, shared_state=shared_state)
 
         self.base_folder_path = os.path.dirname(os.path.abspath(__file__)) + "/Modules"

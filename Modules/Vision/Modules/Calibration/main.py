@@ -15,14 +15,14 @@ from Modules.Vision.OutlierDetection import CalibrationOutlierDetection
 from API.shared_state import BoundaryBoxFactory, BoundaryBoxResetFlagFactory, CalibrationFlagFactory, CameraFactory, DebugModeFlagFactory
 
 class Calibration_Module(ModuleHelper):
-    def __init__(self, memory_name: str, image_shape=(1080, 1920, 3), app: Flask = None, output: Queue = None, 
+    def __init__(self, memory_name: str, image_shape, app: Flask = None, output: Queue = None, 
                  shared_state: multiprocessing.managers.SyncManager.dict = None):
         """
         Initializes the Calibration_Module class.
 
         Args:
             memory_name (str): The name of the memory shared between processes.
-            image_shape (tuple): The shape of the image (default is (1080, 1920, 3)).
+            image_shape (tuple): The shape of the image.
             app (Flask, optional): Flask application instance.
             output (Queue, optional): Queue for sending data to other processes.
             shared_state (multiprocessing.managers.SyncManager.dict, optional): Shared state dictionary.

@@ -34,18 +34,20 @@ class ModuleHelper(Process):
         self.output = output
         self.shared_state = shared_state
 
+        memory_size = self.config.get_int('RESOLUTION_WIDTH')*self.config.get_int('RESOLUTION_HEIGHT')*self.config.get_int('RESOLUTION_CHANELS')
+        
         # Setting up modules
-        if (has_modules):            
+        if (has_modules):
             # Memory that it will send to their own processes list
-            self.memory = shared_memory.SharedMemory(create=True, size=self.config.get_int('RESOLUTION_WIDTH')*self.config.get_int('RESOLUTION_HEIGHT')*self.config.get_int('RESOLUTION_CHANELS'))
+            self.memory = shared_memory.SharedMemory(create=True, size=memory_size)
             # Setting up the multi process modules helper
             self.modules = Modules_MultiProcess(module_directory, module_str)
             # Initialises all of the modules
-            self.modules.initialise(self.memory.name, app=app, output=output, shared_state=shared_state)
+            self.modules.initialise(self.memory.name, memory_size=memory_size, app=app, output=output, shared_state=shared_state)
 
         # The data input
         if (parent_memory_name is not None):
-            self.parent_memory = shared_memory.SharedMemory(name=parent_memory_name, size=self.config.get_int('RESOLUTION_WIDTH')*self.config.get_int('RESOLUTION_HEIGHT')*self.config.get_int('RESOLUTION_CHANELS'))
+            self.parent_memory = shared_memory.SharedMemory(name=parent_memory_name, size=memory_size)
 
     @abstractmethod
     def prep(self):
@@ -93,7 +95,9 @@ class ModuleHelper(Process):
         if len(self.parent_memory.buf) < buffer_size:
             raise ValueError("Buffer size is too small for the image. Ensure the shared memory size is correct.")
 
-        self.frame = np.ndarray((1080, 1920, 3), dtype=np.uint8, buffer=self.parent_memory.buf)
+
+        self.frame = np.ndarray((self.config.get_int('RESOLUTION_HEIGHT'), self.config.get_int('RESOLUTION_WIDTH'), 3), 
+                                dtype=np.uint8, buffer=self.parent_memory.buf)
         logger.info(f"Attempting to set up Camera")
         
         return self.frame

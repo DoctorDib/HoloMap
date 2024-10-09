@@ -70,7 +70,7 @@ def run_server(manager):
         base_folder_path = os.path.dirname(os.path.abspath(__file__)) + "/Modules"
         modules = Modules_MultiProcess(base_folder_path, "Modules.{0}.main.{0}_Module")
 
-        modules.initialise(None, output=output, shared_state=managers.get_shared_state())
+        modules.initialise(None, memory_size= Config().get_int('RESOLUTION_WIDTH') * Config().get_int('RESOLUTION_HEIGHT') * Config().get_int('RESOLUTION_CHANELS'), output=output, shared_state=managers.get_shared_state())
 
         eventlet.wsgi.server(eventlet.listen(('0.0.0.0', 5000)), app)
 

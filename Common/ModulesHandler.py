@@ -18,7 +18,7 @@ class Modules_MultiProcess():
         self.base_folder_path = base_folder_path
         self.class_path_pattern = class_path_pattern
 
-    def initialise(self, memory_name: str, memory_size: int = 1920 * 1080 * 3, app: Flask = None, 
+    def initialise(self, memory_name: str, memory_size: int, app: Flask = None, 
                    output: multiprocessing.Queue = None, shared_state: multiprocessing.managers.SyncManager.dict = None):
         # Get all modules that have main.py
         self.main_files = []
@@ -61,10 +61,13 @@ class Modules_SingleProcess():
         self.base_folder_path = base_folder_path
         self.class_path_pattern = class_path_pattern
 
-    def initialise(self, memory_name: str, memory_size: int = 1920 * 1080 * 3):
+    def initialise(self, memory_name: str, memory_size: int):
         # Get all modules that have main.py
         self.main_files = []
         self.instances = []
+
+        # Setting memory size
+        memory_size = self.config.get_int('RESOLUTION_WIDTH') * self.config.get_int('RESOLUTION_HEIGHT') * self.config.get_int('RESOLUTION_CHANELS')
 
         # Loop through all items in the base folder
         for item in os.listdir(self.base_folder_path):
