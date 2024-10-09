@@ -26,3 +26,10 @@ def sql_val(key : str, val : any, add_speechmarks : bool = False):
 
 def prep_custom_keys(keys : list[str]) -> str:
     return ", ".join(keys)
+
+def tuple_num_to_tuple_int(tuple_num : tuple[int, int]) -> tuple[int, int]:
+    return (int(tuple_num[0]), int(tuple_num[1]))
+
+def convert_tuple_coords(tuple_num):
+    return (tuple_num_to_tuple_int(tuple_num[0]), tuple_num_to_tuple_int(tuple_num[1]), tuple_num_to_tuple_int(tuple_num[2]), tuple_num_to_tuple_int(tuple_num[3]))
+

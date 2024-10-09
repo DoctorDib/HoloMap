@@ -2,24 +2,23 @@ import { useEffect, useRef } from 'react';
 
 import './spotlight-style.scss';
 import { useSelector } from 'react-redux';
-import { QR, StateTypes } from '../../../Interfaces/StateInterface';
+import { ArUco, StateTypes } from '../../Interfaces/StateInterface';
 
 const Spotlight = () => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const canvaContainerRef = useRef<HTMLDivElement>(null);
 
-    const qrs: QR = useSelector((state: StateTypes): QR => state.root.qr);
+    const arucos: ArUco = useSelector((state: StateTypes): ArUco => state.root.aruco);
 
     useEffect(() => {
         const canvas = canvasRef.current;
         const container = canvaContainerRef.current;
         if (canvas) {
 
-            if (qrs === undefined)
+            if (arucos === undefined || arucos.detected_arucos === undefined)
                 return;
 
-            const detected = qrs.detected_qrs;
-            console.log(detected);
+            const detected = arucos.detected_arucos;
 
             const ctx = canvas.getContext('2d');
 
@@ -56,7 +55,7 @@ const Spotlight = () => {
                 }
             }
         }
-    }, [qrs]);
+    }, [arucos]);
     
     return (
         <div ref={canvaContainerRef} style={{ width:'100%', height:'100%', position: 'absolute' }}>

@@ -51,6 +51,9 @@ class QR_Module(ModuleHelper):
 
     # Called from the main thread
     def run(self):
+        # NOTE: DISABLED - very bulky and slow so switching to ArUco for now
+        return
+    
         if (self.detector is None):
             self.prep()
 

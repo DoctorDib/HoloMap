@@ -7,6 +7,7 @@ const initialResultState : RootTypes = {
     settings: {},
     socket: undefined,
     qr: undefined,
+    aruco: undefined,
     cursor: undefined,
 };
 
@@ -61,6 +62,24 @@ const reducer = (state = initialResultState, action: any = { }) => { // TODO - B
                 qr: {
                     ... state.qr,
                     detected_qrs: [],
+                },
+            };
+
+        // ArUco
+        case DataActionEnum.ArUco_SetDetectionList:
+            return {
+                ...state,
+                aruco: {
+                    ... state.aruco,
+                    detected_arucos: action.data.data,
+                },
+            };
+        case DataActionEnum.ArUco_EmptyDetectionList:
+            return {
+                ...state,
+                aruco: {
+                    ... state.aruco,
+                    detected_arucos: [],
                 },
             };
 

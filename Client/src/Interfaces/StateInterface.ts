@@ -19,6 +19,7 @@ interface RootTypes {
     settings: object, // TODO - Look more into interfaces for this?
     socket?: Socket,
     qr: QR,
+    aruco: ArUco,
     cursor: Cursor,
 }
 
@@ -45,6 +46,11 @@ interface Webcam_Calibration {
 // QR
 interface QR {
     detected_qrs: Array<Array<Array<number>>>,
+}
+
+// ArUco
+interface ArUco {
+    detected_arucos: Array<Array<Array<number>>>,
 }
 
 // Cursor
@@ -118,8 +124,9 @@ export {
     ContextStateInterface,
     ContextOptionInterface,
 
-    // QR Handling
+    // Data Vision Handling
     QR,
+    ArUco,
 
     // Cursor Handling 
     Cursor,

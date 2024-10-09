@@ -167,10 +167,6 @@ class Calibration_Module(ModuleHelper):
             tuple or None: The coordinates and size of the aruco marker if detected; otherwise, None.
         """
 
-        # Convert the imageFrame in
-        # BGR(RGB color space) to
-        # HSV(hue-saturation-value)
-        # color space
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
        
         corners, ids, _ = aruco.detectMarkers(gray, self.dictionary, parameters=self.parameters)

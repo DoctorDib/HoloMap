@@ -33,9 +33,10 @@ class Vision_Module(ModuleHelper):
         # self.detector.set(cv2.CAP_PROP_FPS, self.config.get_int("FPS"))
         # self.detector.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'))
 
-        # Screen friendly
-        self.detector.set(cv2.CAP_PROP_AUTO_WB, 0)  # Disable auto white balance
-        self.detector.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.4)  # Disable auto exposure (0.25 is manual mode, 0.75 is auto)
+        # Screen friendly (Mainly or colour recognition)
+        # NOTE: Might not be needed anymore
+        # self.detector.set(cv2.CAP_PROP_AUTO_WB, 0)  # Disable auto white balance
+        # self.detector.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.4)  # Disable auto exposure (0.25 is manual mode, 0.75 is auto)
 
         # Disable auto-exposure
         # self.detector.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.25)  # This might vary depending on your webcam model

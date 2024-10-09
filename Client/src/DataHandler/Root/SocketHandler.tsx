@@ -22,6 +22,7 @@ const createSocket = (): Socket => {
         const parsedData: SocketInterface = JSON.parse(data);
 
         QrSocketActions(parsedData);
+        ArUcoSocketActions(parsedData);
         CalibrationSocketActions(parsedData);
         CursorSocketActions(parsedData);
     });
@@ -39,6 +40,20 @@ const QrSocketActions = (parsedData: SocketInterface): void => {
         case 'CLEAR_QR':
             return getStore().dispatch({
                 type: DataActionEnum.QR_EmptyDetectionList,
+            });
+    }
+};
+
+const ArUcoSocketActions = (parsedData: SocketInterface): void => {
+    switch (parsedData.tag) {
+        case 'ARUCO_DETECTION':
+            return getStore().dispatch({
+                type: DataActionEnum.ArUco_SetDetectionList,
+                data: parsedData,
+            });
+        case 'CLEAR_ARUCO':
+            return getStore().dispatch({
+                type: DataActionEnum.ArUco_EmptyDetectionList,
             });
     }
 };
