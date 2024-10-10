@@ -2,6 +2,7 @@ import { io, Socket } from 'socket.io-client';
 import { DataActionEnum } from '../../Common/enumerations';
 import { getStore } from '../../Stores/store';
 import { getCalibrations, projectorSetEdit, saveCalibration, webcamSetBoundary, webcamSetEdit } from '../Calibration/Actions';
+import { notifyError, notifySuccess } from '../Notifications/Actions';
 
 interface SocketInterface {
     name: string, 
@@ -16,6 +17,13 @@ const createSocket = (): Socket => {
     
     socket.on('connect', (): void => {
         console.log('Connected to the server!');
+        notifySuccess('Connected to server!');
+    });
+
+    // Listen for disconnect event
+    socket.on('disconnect', (reason: string): void => {
+        console.log('Disconnected from the server:', reason);
+        notifyError('Disconnected from server. Reason: ' + reason);
     });
     
     socket.on('set_data', (data: any): void => {

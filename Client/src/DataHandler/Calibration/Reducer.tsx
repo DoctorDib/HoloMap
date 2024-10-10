@@ -57,6 +57,10 @@ const reducer = (state = initialResultState, action: any = {}) => {
             };
 
         case DataActionEnum.GetCalibrations:
+            if (action.calibrations === undefined) {
+                return { ...newState };
+            }
+            
             return {
                 ...newState,
                 projector: {

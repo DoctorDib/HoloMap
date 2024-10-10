@@ -3,6 +3,7 @@ import { useEffect, useRef } from 'react';
 import './spotlight-style.scss';
 import { useSelector } from 'react-redux';
 import { ArUco, StateTypes } from '../../Interfaces/StateInterface';
+import Config from '../../Common/Config';
 
 const Spotlight = () => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -27,8 +28,8 @@ const Spotlight = () => {
 
             if (ctx) {
                 // Calculate scale factors
-                const scaleX = container.clientWidth / 1920;
-                const scaleY = container.clientHeight / 1080;
+                const scaleX = container.clientWidth / Config.resolution.width;
+                const scaleY = container.clientHeight / Config.resolution.height;
 
                 // Set the transformation matrix
                 ctx.setTransform(scaleX, 0, 0, scaleY, 0, 0);

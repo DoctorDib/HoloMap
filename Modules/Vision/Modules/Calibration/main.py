@@ -63,6 +63,9 @@ class Calibration_Module(ModuleHelper):
 
         try:
             while not self.shutdown_event.is_set():
+                # Needs to be diferent from self.timeout_buffer because of a weird
+                #     behaviour where it triggers because the marker has a chance 
+                #     to move.
                 # Helps preventing overflow!
                 sleep(1)
 

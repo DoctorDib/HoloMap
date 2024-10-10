@@ -7,6 +7,7 @@ import Spotlight from '../Components/Spotlight';
 import CornerMarkComponent from '../Components/CornerMark';
 import CommandButtonsComponent from '../Components/CommandButtons';
 import CursorComponent from '../Components/Cursor';
+import NotificationComponent from '../Components/Toast';
 
 const SandboxPage = (): React.ReactElement => {
     return (<>
@@ -19,13 +20,12 @@ const SandboxPage = (): React.ReactElement => {
                         <div className={'text'}> Project HOLOMAP: Sandbox </div>
                     </div>
 
-                    
-
                     <CommandButtonsComponent/>
                     <CursorComponent/>
                     <Spotlight/>
 
                     <CornerMarkComponent/>
+                    <NotificationComponent/>                    
                 </>)
             }/>
         </div>

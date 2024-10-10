@@ -7,4 +7,9 @@ export default {
         max_history: 5,
         interval_update: 5, //seconds
     },
+
+    resolution: {
+        width: packageJson.resolution.width,
+        height: packageJson.resolution.height,
+    },
 };

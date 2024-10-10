@@ -37,6 +37,11 @@ const reducer = (state = initialResultState, action: any = { }) => { // TODO - B
                 ...state,
                 socket: createSocket(),
             };
+        case DataActionEnum.Socket_Set:
+            return {
+                ...state,
+                socket: action.socket,
+            };
 
         case DataActionEnum.Socket_SendData:
             if (!state.socket)

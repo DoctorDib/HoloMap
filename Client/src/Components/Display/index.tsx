@@ -25,7 +25,6 @@ const DisplayComponent = ({ content }: DisplayComponentInterface): React.ReactEl
     };
 
     useEffect(() => {
-        console.log(readonlyBoundary);
         // Initial setting
         if (Object.keys(readonlyBoundary).length !== 0 && readonlyBoundary !== undefined) {
             

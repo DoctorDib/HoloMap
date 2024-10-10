@@ -95,8 +95,6 @@ export const getCalibrations = async () => {
     // Updating database
     const response = await utils.sendData('/calibration/get/all');
 
-    console.log('getting all calibrations', response);
-
     // Updating local data
     return getStore().dispatch({
         type: DataActionEnum.GetCalibrations,

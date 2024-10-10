@@ -4,8 +4,6 @@
 const { app, BrowserWindow } = require('electron');
 const path = require('node:path');
 
-require('dotenv').config({ path: path.join(__dirname, '../.env') });
-
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
   app.quit();

@@ -65,7 +65,6 @@ const CornerMarkComponent = (): React.ReactElement => {
             return;
 
         const intervalId = setInterval(() => {
-            console.log(markRedness);
             setMarkRedness((prev) => Math.min(prev + incrementValue, 1)); // Increment markRedness, max is 255
         }, interval);
 

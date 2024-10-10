@@ -31,7 +31,7 @@ export const requestWithLogs = (requestEnum: number, data:any = null): any => as
     }
 };
 
-export const initialiseDataRequest = async (): Promise<any> => { 
+export const initialiseDataRequest = async (loadSocket = true): Promise<any> => { 
     getStore().dispatch({ type: DataActionEnum.LOAD });
 
     // Grabbing the initial data from the database
@@ -53,9 +53,11 @@ export const initialiseDataRequest = async (): Promise<any> => {
     // Saving data
     getStore().dispatch(newData);
     
-    // Initialising WebSocket events
-    console.log('Init socket');
-    getStore().dispatch({ ...newData, type: DataActionEnum.Socket_Initialise });
+    if (loadSocket) {
+        // Initialising WebSocket events
+        console.log('Init socket');
+        getStore().dispatch({ ...newData, type: DataActionEnum.Socket_Initialise });
+    }
 
     // Triggering the initial load for the webcam calibration
     initialCalibrationLoad();

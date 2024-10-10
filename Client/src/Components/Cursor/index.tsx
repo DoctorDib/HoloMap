@@ -3,6 +3,7 @@ import { useEffect, useRef } from 'react';
 import './cursor-style.scss';
 import { useSelector } from 'react-redux';
 import { Cursor, StateTypes } from '../../Interfaces/StateInterface';
+import Config from '../../Common/Config';
 
 const CursorComponent = () => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -11,7 +12,6 @@ const CursorComponent = () => {
     const cursor: Cursor = useSelector((state: StateTypes): Cursor => state.root.cursor);
 
     useEffect(() => {
-        console.log(cursor);
         const canvas = canvasRef.current;
         const container = canvaContainerRef.current;
         if (canvas) {
@@ -26,8 +26,8 @@ const CursorComponent = () => {
 
             if (ctx) {
                 // Calculate scale factors
-                const scaleX = container.clientWidth / 1920;
-                const scaleY = container.clientHeight / 1080;
+                const scaleX = container.clientWidth / Config.resolution.width;
+                const scaleY = container.clientHeight / Config.resolution.height;
 
                 // Set the transformation matrix
                 ctx.setTransform(scaleX, 0, 0, scaleY, 0, 0);

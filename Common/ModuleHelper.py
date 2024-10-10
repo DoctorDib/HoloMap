@@ -54,6 +54,9 @@ class ModuleHelper(Process):
         """
         Prepares the module process with any custom stuff
         """
+
+        self.timeout_buffer = self.config.get_double('TIMEOUT_BUFFER')
+
         pass
 
     @abstractmethod
@@ -92,14 +95,18 @@ class ModuleHelper(Process):
         """
         # Ensure the buffer is large enough for the image
         buffer_size = np.prod(self.image_shape)
+        
         if len(self.parent_memory.buf) < buffer_size:
             raise ValueError("Buffer size is too small for the image. Ensure the shared memory size is correct.")
 
-
-        self.frame = np.ndarray((self.config.get_int('RESOLUTION_HEIGHT'), self.config.get_int('RESOLUTION_WIDTH'), 3), 
-                                dtype=np.uint8, buffer=self.parent_memory.buf)
-        logger.info(f"Attempting to set up Camera")
+        height = self.config.get_int('RESOLUTION_HEIGHT')
+        width = self.config.get_int('RESOLUTION_WIDTH')
+        channels = self.config.get_int('RESOLUTION_CHANELS')
         
+        self.frame = np.ndarray((height, width, channels), dtype=np.uint8, buffer=self.parent_memory.buf)
+        
+        logger.info(f"Attempting to set up Camera")
+
         return self.frame
     
     def receive_image(self):
@@ -109,12 +116,16 @@ class ModuleHelper(Process):
         Returns:
             np.ndarray or None: The image frame if available; otherwise, None.
         """
-        if self.frame is not None and self.frame.size > 0 and not np.all(self.frame) and np.any(self.frame):
+
+        if self.frame is not None and self.frame.size > 0:
+            if not np.any(self.frame):
+                return None
+            
             # Ensuring they can modify their own images without affecting other threads
             img_copy = self.frame.copy()
             return img_copy
         else:
-            self.set_up_frame()
+            self.frame = self.set_up_frame()
             return None
 
     def __del__(self):

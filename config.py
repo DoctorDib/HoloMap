@@ -38,6 +38,18 @@ class Config():
 
     MainDir = os.path.dirname(os.path.abspath(os.path.dirname(__file__)))
 
+    def get_double(self, key):
+        try:
+            if key in self.cached_data:
+                return self.cached_data[key]
+            else:
+                new_data = float(os.getenv(key))  # Use float to handle double precision
+                print(f"{key}: {new_data}")
+                self.cached_data.update({key: new_data})
+                return new_data
+        except Exception as e:
+            logging.exception(e)
+
     def get_int(self, key):
         try:
             if (key in self.cached_data):

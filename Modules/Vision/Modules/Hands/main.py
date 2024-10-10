@@ -1,4 +1,5 @@
 import multiprocessing
+from time import sleep
 import logger
 import os
 import cv2
@@ -24,6 +25,7 @@ class Hands_Module(ModuleHelper):
 
     def prep(self):
         self.detector = FindHands()
+        super().prep()
 
     # Called from the main thread
     def run(self):
@@ -32,6 +34,8 @@ class Hands_Module(ModuleHelper):
 
         try:
             while not self.shutdown_event.is_set():
+                sleep(self.timeout_buffer)
+                
                 try:
                     img = self.receive_image()
 

@@ -14,7 +14,6 @@ const App = (): React.ReactElement => {
     const landingPageRef = useRef(null);
 
     useEffect(() => {
-        console.log('WAWEOAMSDOALSD<F');
         // Initialising data and sockets
         initialiseDataRequest();
     }, []);

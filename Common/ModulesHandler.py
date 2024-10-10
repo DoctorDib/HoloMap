@@ -28,7 +28,8 @@ class Modules_MultiProcess():
             item_path = os.path.join(self.base_folder_path, item)
             if os.path.isdir(item_path):  # Check if the item is a directory
                 main_file_path = os.path.join(item_path, 'main.py')
-                if os.path.isfile(main_file_path):  # Check if main.py exists in the directory
+                disabled = os.path.join(item_path, 'disabled')
+                if os.path.isfile(main_file_path) and not os.path.isfile(disabled):  # Check if main.py exists in the directory
                     self.main_files.append((item, main_file_path))  # Store the folder name and path
 
         for main_file in self.main_files:

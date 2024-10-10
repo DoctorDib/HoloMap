@@ -5,6 +5,7 @@ import './command_buttons_style.scss';
 import ButtonComponent from '../Inputs/Button';
 import { projectorSetBoundary, projectorSetEdit, saveCalibration, webcamSetEdit } from '../../DataHandler/Calibration/Actions';
 import { StateTypes } from '../../Interfaces/StateInterface';
+import Config from '../../Common/Config';
 
 const CommandButtonsComponent = (): React.ReactElement => {    
     const webcamEdit: boolean = useSelector((state: StateTypes): boolean => state.calibrations.webcam.edit);
@@ -19,9 +20,9 @@ const CommandButtonsComponent = (): React.ReactElement => {
             'main-content': {
                 corners: [
                     0, 0,
-                    1920, 0,
-                    0, 1080,
-                    1920, 1080,
+                    Config.resolution.width, 0,
+                    0, Config.resolution.height,
+                    Config.resolution.width, Config.resolution.height,
                 ],
             },
         });
