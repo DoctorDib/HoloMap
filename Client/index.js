@@ -18,7 +18,7 @@ const createWindow = () => {
         autoHideMenuBar: true,
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'),
-            devTools: true
+            devTools: false
         },
     });
 
