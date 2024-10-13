@@ -37,6 +37,11 @@ class BoundaryBoxFactory(SharedStateValue):
         super().__init__('boundary_box', shared_state, read_only)
         self.value: BoundaryBox
 
+class ProjectorBoundaryBoxFactory(SharedStateValue):
+    def __init__(self, shared_state: multiprocessing.managers.SyncManager.dict, read_only: bool = False):
+        super().__init__('projector_boundary_box', shared_state, read_only)
+        self.value: BoundaryBox
+
 class CalibrationFlagFactory(SharedStateValue):
     def __init__(self, shared_state: multiprocessing.managers.SyncManager.dict, read_only: bool = False):
         super().__init__('calibration_flag', shared_state, read_only)
@@ -65,6 +70,8 @@ class SharedState:
         with DebugModeFlagFactory(self.shared_state) as state:
             state.value = False
         with BoundaryBoxFactory(self.shared_state) as state:
+            state.value = BoundaryBox()
+        with ProjectorBoundaryBoxFactory(self.shared_state) as state:
             state.value = BoundaryBox()
         with HandsFactory(self.shared_state) as state:
             state.value = HandsControl()

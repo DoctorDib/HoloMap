@@ -41,6 +41,12 @@ class BoundaryBox():
         self.bottom_right = None
         self.bottom_left = None
         
+    def get_width(self):
+        return self.top_right[0] - self.top_left[0]
+    
+    def get_height(self):
+        return self.bottom_right[1] - self.top_left[1]
+        
     def is_set(self):
         return self.top_left is not None and self.top_right is not None and self.bottom_right is not None and self.bottom_left is not None
 
@@ -67,19 +73,19 @@ class BoundaryBox():
 
         return inside
     
-    def draw_boundary(self, img: cv2.typing.MatLike) -> cv2.typing.MatLike:
+    def draw_boundary(self, img: cv2.typing.MatLike, color: tuple = (0, 0, 255)) -> cv2.typing.MatLike:
         # top of boundary
         if (self.top_left is not None and self.top_right is not None):
-            img = cv2.line(img, self.top_left, self.top_right, (0, 0, 255), self.line_thickess)
+            img = cv2.line(img, self.top_left, self.top_right, color, self.line_thickess)
         # right side of boundary
         if (self.top_right is not None and self.bottom_right is not None):
-            img = cv2.line(img, self.top_right, self.bottom_right, (0, 0, 255), self.line_thickess)
+            img = cv2.line(img, self.top_right, self.bottom_right, color, self.line_thickess)
         # bottom of boundary
         if (self.bottom_right is not None and self.bottom_left is not None):
-            img = cv2.line(img, self.bottom_right, self.bottom_left, (0, 0, 255), self.line_thickess)
+            img = cv2.line(img, self.bottom_right, self.bottom_left, color, self.line_thickess)
         # left side of boundary
         if (self.bottom_left is not None and self.top_left is not None):
-            img = cv2.line(img, self.bottom_left, self.top_left, (0, 0, 255), self.line_thickess)
+            img = cv2.line(img, self.bottom_left, self.top_left, color, self.line_thickess)
 
         return img
     

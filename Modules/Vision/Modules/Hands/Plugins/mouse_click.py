@@ -1,4 +1,4 @@
-import multiprocessing
+import multiprocessing, pyautogui
 from API.shared_state import BoundaryBoxFactory, HandsFactory
 from Common import Plugins
 from Modules.Vision.Modules.Hands.hands_control import HandsControl
@@ -49,6 +49,8 @@ class mouse_click:
                             self.has_clicked = True
                             self.last_click_time = current_time  # Update last click time
                             
+                            self.mouse_down()
+                            
                             # Moving virtual mouse cursor
                             self.output.put({
                                 "name": "Mouse is down",
@@ -63,6 +65,8 @@ class mouse_click:
                             self.has_clicked = False
                             self.last_release_time = current_time  # Update last release time
                             
+                            self.mouse_up()
+
                             # Moving virtual mouse cursor
                             self.output.put({
                                 "name": "Mouse is up",
@@ -70,4 +74,8 @@ class mouse_click:
                                 "data": [self.has_clicked]
                             })
                             
-                    
+    def mouse_down(self):
+        pyautogui.mouseDown()
+        
+    def mouse_up(self):
+        pyautogui.mouseUp()

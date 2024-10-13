@@ -69,6 +69,14 @@ def create_calibration_route(shared_state):
             projector_calibration = CalibrationDataHandler().get_calibration(CalibrationType.PROJECTION).to_json()
             webcam_calibration = CalibrationDataHandler().get_calibration(CalibrationType.WEBCAM).to_json()
 
+            # Saving for Python to access
+            coords = webcam_calibration["readonly_boundary_obj"]
+            # Top left, top right, bottom right, bottom left
+            shared_state['boundary_box'] = BoundaryBox(coords[0], coords[1], coords[2], coords[3])
+            coords = projector_calibration["readonly_boundary_obj"]["main-content"]["corners"]
+            # Top left, top right, bottom left, bottom right
+            shared_state['projector_boundary_box'] = BoundaryBox((coords[0], coords[1]), (coords[2], coords[3]), (coords[6], coords[7]), (coords[4], coords[5]))
+            
             return {
                 "projector": projector_calibration,
                 "webcam": webcam_calibration
@@ -98,10 +106,18 @@ def create_calibration_route(shared_state):
     def calibration_initial_load():
         try:
             webcam_calibration = CalibrationDataHandler().get_calibration(CalibrationType.WEBCAM)
+            projector_calibration = CalibrationDataHandler().get_calibration(CalibrationType.PROJECTION)
             
+            print(projector_calibration.readonly_boundary_obj["main-content"]["corners"])
+            
+            # Saving for Python to access
             coords = webcam_calibration.readonly_boundary_obj
-
+            # Top left, top right, bottom right, bottom left
             shared_state['boundary_box'] = BoundaryBox(coords[0], coords[1], coords[2], coords[3])
+            coords = projector_calibration.readonly_boundary_obj["main-content"]["corners"]
+            # Top left, top right, bottom left, bottom right
+            shared_state['projector_boundary_box'] = BoundaryBox((coords[0], coords[1]), (coords[2], coords[3]), (coords[6], coords[7]), (coords[4], coords[5]))
+            
         except Exception as e:
             logger.exception(e)
         return {}

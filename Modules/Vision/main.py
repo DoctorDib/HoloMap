@@ -1,7 +1,7 @@
 from multiprocessing import Queue
 import multiprocessing
 import os
-from API.shared_state import BoundaryBoxFactory, CameraFactory, DebugModeFlagFactory
+from API.shared_state import BoundaryBoxFactory, CameraFactory, DebugModeFlagFactory, ProjectorBoundaryBoxFactory
 import cv2
 from flask import Flask
 import numpy as np
@@ -66,8 +66,12 @@ class Vision_Module(ModuleHelper):
                     if img is not None and flag_state.value:
                         with BoundaryBoxFactory(self.shared_state, read_only=True) as boundary_state:
                             img = boundary_state.value.draw_boundary(img)
-                            with CameraFactory("main_camera", self.shared_state) as camera_state:
-                                camera_state.value = img
+                            
+                            with ProjectorBoundaryBoxFactory(self.shared_state, read_only=True) as projector_state:
+                                img = projector_state.value.draw_boundary(img, (0, 255, 0))
+                                
+                                with CameraFactory("main_camera", self.shared_state) as camera_state:
+                                    camera_state.value = img
                 cv2.waitKey(1)
 
         except Exception as e:
