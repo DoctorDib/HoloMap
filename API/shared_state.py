@@ -1,3 +1,4 @@
+from Modules.Vision.Modules.Hands.hands_control import HandsControl
 import multiprocessing, numpy
 
 from Modules.Vision.BoundaryBox import BoundaryBox
@@ -25,6 +26,11 @@ class SharedStateValue:
             self.shared_state[self.key] = self.value
 
         return True
+    
+class HandsFactory(SharedStateValue):
+    def __init__(self, shared_state: multiprocessing.managers.SyncManager.dict, read_only: bool = False):
+        super().__init__('hands', shared_state, read_only)
+        self.value: HandsControl
 
 class BoundaryBoxFactory(SharedStateValue):
     def __init__(self, shared_state: multiprocessing.managers.SyncManager.dict, read_only: bool = False):
@@ -60,6 +66,8 @@ class SharedState:
             state.value = False
         with BoundaryBoxFactory(self.shared_state) as state:
             state.value = BoundaryBox()
+        with HandsFactory(self.shared_state) as state:
+            state.value = HandsControl()
 
         # Calibration specifics
         with CalibrationFlagFactory(self.shared_state) as state:

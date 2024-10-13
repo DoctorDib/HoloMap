@@ -1,7 +1,7 @@
 from multiprocessing import Queue
 import multiprocessing
 from time import sleep
-from API.shared_state import BoundaryBoxFactory, CameraFactory, DebugModeFlagFactory
+from API.shared_state import BoundaryBoxFactory, CalibrationFlagFactory, CameraFactory, DebugModeFlagFactory
 from Common.KalmanFilter import KalmanFilter
 from Common.helper import convert_tuple_coords
 from flask import Flask
@@ -53,9 +53,9 @@ class ArUco_Module(ModuleHelper):
             while not self.shutdown_event.is_set():
                 sleep(self.timeout_buffer)
 
-                # with(CalibrationFlagFactory(self.shared_state, read_only=True)) as flag_state:
-                #     if (flag_state.value):
-                #         continue
+                with(CalibrationFlagFactory(self.shared_state, read_only=True)) as flag_state:
+                    if (flag_state.value):
+                        continue
 
                 try:                    
                     img = self.receive_image()

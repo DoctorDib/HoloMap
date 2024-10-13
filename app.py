@@ -10,7 +10,7 @@ import os, multiprocessing
 
 # COMMON
 from Common.Classes.instance import Instance
-from Common.ModulesHandler import Modules_MultiProcess
+from Common.Modules import Modules
 # PAGE IMPORTS
 from API.Settings.routes import settings_routes_app, settings_get
 from API.Calibration.routes import create_calibration_route
@@ -68,7 +68,7 @@ def run_server(manager):
 
         # Modules system for vision
         base_folder_path = os.path.dirname(os.path.abspath(__file__)) + "/Modules"
-        modules = Modules_MultiProcess(base_folder_path, "Modules.{0}.main.{0}_Module")
+        modules = Modules(base_folder_path, "Modules.{0}.main.{0}_Module")
 
         modules.initialise(None, memory_size= Config().get_int('RESOLUTION_WIDTH') * Config().get_int('RESOLUTION_HEIGHT') * Config().get_int('RESOLUTION_CHANELS'), output=output, shared_state=managers.get_shared_state())
 
@@ -79,6 +79,7 @@ def run_server(manager):
     except KeyboardInterrupt:
         pass
     # finally:
+        # modules.shutdown()
         # print("Shutting down the modules")
         # modules.shutdown()
         # print("Closing instance")

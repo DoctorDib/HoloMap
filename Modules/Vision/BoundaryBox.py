@@ -40,8 +40,14 @@ class BoundaryBox():
         self.top_right = None
         self.bottom_right = None
         self.bottom_left = None
+        
+    def is_set(self):
+        return self.top_left is not None and self.top_right is not None and self.bottom_right is not None and self.bottom_left is not None
 
     def is_in_boundary(self, x: int, y: int) -> bool:
+        if (not self.is_set()):
+            return None
+        
         points = [self.top_left, self.top_right, self.bottom_right, self.bottom_left]
         n = len(points)
         inside = False
@@ -105,7 +111,26 @@ class BoundaryBox():
         # Reshape the result to match the input_box shape
         return transformed_box.reshape(-1, 2)      
     
-    def get_relative_position(self, img, point):
+    def get_relative_position_from_img(self, img, point):
+        """
+        Get the relative position of a point in a quadrilateral boundary box.
+
+        Parameters:
+        - point: Tuple (x, y) representing the point coordinates.
+        - box_coords: List of tuples containing the coordinates of the boundary box corners 
+                    in the order: top-left, top-right, bottom-right, bottom-left.
+                    Format: [(x1, y1), (x2, y2), (x3, y3), (x4, y4)]
+
+        Returns:
+        - Tuple (relative_x, relative_y) if the point is within the boundary box,
+        otherwise None.
+        """
+        # Get the dimensions of the input image
+        height, width = img.shape[:2]
+
+        return self.get_relative_position_from_height_width(height, width, point)
+    
+    def get_relative_position_from_height_width(self, height, width, point):
         """
         Get the relative position of a point in a quadrilateral boundary box.
 
@@ -123,9 +148,6 @@ class BoundaryBox():
 
         box_coords = [(self.top_left[0], self.top_left[1]), (self.top_right[0], self.top_right[1]), (self.bottom_right[0], self.bottom_right[1]), (self.bottom_left[0], self.bottom_left[1])]
         box_coords_np = np.array(box_coords, dtype='float32')
-
-        # Get the dimensions of the input image
-        height, width = img.shape[:2]
 
         # Create a mask for the defined quadrilateral
         mask = np.zeros((height, width), dtype=np.uint8)  # Match mask size to image size

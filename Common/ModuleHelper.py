@@ -5,7 +5,7 @@ import numpy as np
 
 from flask import Flask
 
-from Common.ModulesHandler import Modules_MultiProcess
+from Common.Modules import Modules
 from config import Config
 import logger
 
@@ -41,7 +41,7 @@ class ModuleHelper(Process):
             # Memory that it will send to their own processes list
             self.memory = shared_memory.SharedMemory(create=True, size=memory_size)
             # Setting up the multi process modules helper
-            self.modules = Modules_MultiProcess(module_directory, module_str)
+            self.modules = Modules(module_directory, module_str)
             # Initialises all of the modules
             self.modules.initialise(self.memory.name, memory_size=memory_size, app=app, output=output, shared_state=shared_state)
 
