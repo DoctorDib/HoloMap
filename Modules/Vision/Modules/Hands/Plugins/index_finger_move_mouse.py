@@ -33,9 +33,6 @@ class index_finger_move_mouse:
                     # out = boundary_state.value.get_relative_position(img, smoothed_position)
                     out = boundary_state.value.get_relative_position_from_height_width(self.height, self.width, finger_tip.position)
                     
-                    print(finger_tip.position)
-                    print(out)
-                    
                     # Moving virtual mouse cursor
                     self.output.put({
                         "name": "Moving Virtual Mouse",

@@ -92,7 +92,10 @@ class Hands_Module(ModuleHelper):
                         
                             # Looping through detected hands
                             for idx, hand_landmarks in enumerate(multi_hands):
-                                is_left = multi_handedness[idx].classification[0].label == 'Left'
+                                # HACK: This is a quick fix to swap left and right hand... for some reason
+                                #       it is the opposite way around, which might be something to do with
+                                #       the mirroring of the camera, maybe?
+                                is_left = multi_handedness[idx].classification[0].label == 'Right' 
                                 
                                 for finger_point in hands_state.value.points_dict.values():
                                     finger_point: FingerPoint = finger_point

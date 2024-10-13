@@ -55,8 +55,11 @@ interface ArUco {
 
 // Cursor
 interface Cursor {
-    x: number,
-    y: number,
+    isMouseDown: boolean,
+    position: {
+        x: number,
+        y: number,
+    },
 }
 
 // Notifications

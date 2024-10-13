@@ -73,6 +73,11 @@ const CursorSocketActions = (parsedData: SocketInterface): void => {
                 type: DataActionEnum.Cursor_Set,
                 data: parsedData,
             });
+        case 'MOUSE_CLICK':
+            return getStore().dispatch({
+                type: DataActionEnum.Cursor_Click_Set,
+                data: parsedData,
+            });
         case 'CLEAR_CURSOR':
             return getStore().dispatch({
                 type: DataActionEnum.Cursor_Reset,

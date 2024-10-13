@@ -60,6 +60,7 @@ const DataActionEnum = {
     // Cursor
     Cursor_Set: '61',
     Cursor_Reset: '62',
+    Cursor_Click_Set: '63',
 
     // ArUco
     ArUco_SetDetectionList: '70',

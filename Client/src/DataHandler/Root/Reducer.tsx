@@ -96,9 +96,25 @@ const reducer = (state = initialResultState, action: any = { }) => { // TODO - B
             return {
                 ...state,
                 cursor: {
-                    ... state.cursor,
-                    x: action.data.data[0][0], // x
-                    y: action.data.data[0][1], // y
+                    ...state.cursor,
+                    position: {
+                        ... state.cursor,
+                        x: action.data.data[0][0], // x
+                        y: action.data.data[0][1], // y
+                    },
+                }
+                
+            };
+        case DataActionEnum.Cursor_Click_Set:
+            
+            if (action.data === null)
+                return;
+
+            return {
+                ...state,
+                cursor: {
+                    ...state.cursor,
+                    isMouseDown: action.data.data[0],
                 },
             };
         case DataActionEnum.Cursor_Reset:
@@ -106,8 +122,10 @@ const reducer = (state = initialResultState, action: any = { }) => { // TODO - B
                 ...state,
                 cursor: {
                     ... state.cursor,
-                    x: null, 
-                    y: null,
+                    position: {
+                        x: null, 
+                        y: null,
+                    }
                 },
             };
     }

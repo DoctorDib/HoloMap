@@ -4,7 +4,7 @@ class FingerPoint():
     def __init__(self, name:str, id: int, converted_id: int, is_left: bool):
         self.name = name
         self.id = id
-        self.converted_id = id
+        self.converted_id = converted_id
         self.position = (0, 0)
         self.in_boundaries = False
         self.is_left = is_left

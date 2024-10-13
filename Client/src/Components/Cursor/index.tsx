@@ -37,12 +37,17 @@ const CursorComponent = () => {
 
                 // Begin drawing the square
                 ctx.beginPath();
-                ctx.arc(cursor.x, cursor.y, 10, 0, 2 * Math.PI, false);
+                ctx.arc(cursor.position.x, cursor.position.y, 10, 0, 2 * Math.PI, false);
                 ctx.closePath();
 
                 // Optional: Set stroke and fill style
                 ctx.strokeStyle = 'black';
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.20)';
+
+                if (cursor.isMouseDown){
+                    ctx.fillStyle = 'rgba(255, 0, 0, 0.20)';
+                } else {
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.20)';
+                }
 
                 // Draw the square
                 ctx.fill();
