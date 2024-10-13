@@ -3,6 +3,7 @@ import multiprocessing, pyautogui, requests
 from API.Calibration.routes import calibration_routes_app, create_calibration_route
 from API.Calibration.sql import CalibrationType
 from API.shared_state import BoundaryBoxFactory, HandsFactory, ProjectorBoundaryBoxFactory
+from Common.KalmanFilter import KalmanFilter
 from Modules.Vision.Modules.Hands.hands_control import HandsControl
 from config import Config
 
@@ -17,6 +18,9 @@ class index_finger_move_mouse:
         self.width = self.config.get_int('RESOLUTION_WIDTH')
         
         self.screen_width, self.screen_height = pyautogui.size()
+        
+        # Initialize the Kalman Filter
+        self.kalman_filter = KalmanFilter(process_variance=5e-3, measurement_variance=5e-2)
 
     def run(self):
         with BoundaryBoxFactory(self.shared_state, read_only=True) as boundary_state:
@@ -28,14 +32,14 @@ class index_finger_move_mouse:
                 
                 if (finger_tip.in_boundaries):
                     # Update Kalman Filter
-                    # self.kalman_filter.predict()
-                    # self.kalman_filter.update(finger_tip)
+                    self.kalman_filter.predict()
+                    self.kalman_filter.update(finger_tip.position)
 
                     # Get the smoothed estimate from the Kalman Filter
-                    # smoothed_position = self.kalman_filter.get_estimate().astype(int)
+                    smoothed_position = self.kalman_filter.get_estimate().astype(int)
 
-                    # out = boundary_state.value.get_relative_position(img, smoothed_position)
-                    out = boundary_state.value.get_relative_position_from_height_width(self.height, self.width, finger_tip.position)
+                    out = boundary_state.value.get_relative_position_from_height_width(self.height, self.width, smoothed_position)
+                    # out = boundary_state.value.get_relative_position_from_height_width(self.height, self.width, finger_tip.position)
                     
                     # Moving PC mouse
                     self.move_pc_mouse(out[0], out[1])

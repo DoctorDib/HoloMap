@@ -3,7 +3,6 @@ import logger
 import os
 import cv2
 
-import numpy as np
 import mediapipe as mp
 
 from time import sleep
@@ -14,7 +13,6 @@ from Common.ModuleHelper import ModuleHelper
 from Common.Plugins import PluginLoader
 from Modules.Vision.Modules.Hands.hands_control import FingerPoint, HandsControl
 from API.shared_state import BoundaryBoxFactory, CameraFactory, DebugModeFlagFactory, HandsFactory
-from Common.KalmanFilter import KalmanFilter
 
 class Hands_Module(ModuleHelper):
     def __init__(self, memory_name: str, image_shape, app: Flask = None, output: Queue = None, shared_state: multiprocessing.managers.SyncManager.dict = None):
@@ -23,9 +21,6 @@ class Hands_Module(ModuleHelper):
         self.base_folder_path = os.path.dirname(os.path.abspath(__file__)) + "/Modules"
         self.image_shape = image_shape
         self.frame = None
-
-        # Initialize the Kalman Filter
-        self.kalman_filter = KalmanFilter(process_variance=1e-2, measurement_variance=1e-2)
 
     def prep(self):
         root_path = os.path.dirname(__file__)
