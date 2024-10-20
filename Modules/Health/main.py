@@ -1,6 +1,7 @@
 from multiprocessing import Queue
 import multiprocessing
 import os
+import time
 from API.shared_state import DebugModeFlagFactory
 from Common.Plugins import PluginLoader
 import cv2
@@ -28,11 +29,14 @@ class Health_Module(ModuleHelper):
 
         try:
             while not self.shutdown_event.is_set():
+                time.sleep(self.timeout_buffer)
                 
+                # NOTE - Temporarily disabling for now as I don't really want it 
+                #        to send info when in debug mode.
                 # Run all plugins that are not for debug only
-                for plugin_key in self.plugin_manager.loaded_plugins.keys():
-                    if ("DebugOnly" not in plugin_key):
-                        self.plugin_manager.loaded_plugins[plugin_key].run()
+                # for plugin_key in self.plugin_manager.loaded_plugins.keys():
+                #     if ("DebugOnly" not in plugin_key):
+                #         self.plugin_manager.loaded_plugins[plugin_key].run()
                         
                 # Run all plugins that are for only debug
                 with DebugModeFlagFactory(self.shared_state, read_only=True) as debugState:
