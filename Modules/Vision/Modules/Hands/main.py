@@ -5,7 +5,6 @@ import cv2
 
 import mediapipe as mp
 
-from time import sleep
 from flask import Flask
 from multiprocessing import Queue
 
@@ -59,7 +58,9 @@ class Hands_Module(ModuleHelper):
 
         try:
             while not self.shutdown_event.is_set():
-                sleep(self.timeout_buffer)
+                should_run = self.common_run()
+                if (not should_run):
+                    continue
                 
                 try:
                     img = self.receive_image()
@@ -114,38 +115,26 @@ class Hands_Module(ModuleHelper):
                         
                         with DebugModeFlagFactory(self.shared_state, read_only=True) as flag_state:
                             if (flag_state.value):
+                                
+                                with HandsFactory(self.shared_state) as hands_state:
+                                    if (hands_state.value is None):
+                                        continue
+                                    
+                                    for point in hands_state.value.points_dict.values():
+                                        if not point.in_boundaries:
+                                            continue
+                                        
+                                        center = (int(point.position[0]), int(point.position[1]))
+                                        radius = 5
+                                        color = (0, 255, 0) if point.is_left else (255, 0, 0)
+                                        thickness = -1
+
+                                        # Draw the circle on the image
+                                        cv2.circle(img, center, radius, color, thickness)
+                                    
                                 with CameraFactory("hands_camera", self.shared_state) as camera_state:
-                                    camera_state.value = boundary_state.value.draw_boundary(img)
-                        
-                        # with BoundaryBoxFactory(self.shared_state, read_only=True) as boundary_state:
-                        #     # Get the position of the index finger tip (key point)
-                        #     finger_tip = np.array(hand1_positions[8][:2])  # x, y
-
-                        #     in_boundary = boundary_state.value.is_in_boundary(finger_tip[0], finger_tip[1])
-
-                        #     if (in_boundary):
-                        #         cv2.circle(img, tuple(finger_tip.astype(int)), 5, (255, 0, 0), cv2.FILLED)
-
-                        #         # Update Kalman Filter
-                        #         self.kalman_filter.predict()
-                        #         self.kalman_filter.update(finger_tip)
-
-                        #         # Get the smoothed estimate from the Kalman Filter
-                        #         smoothed_position = self.kalman_filter.get_estimate().astype(int)
-
-                        #         out = boundary_state.value.get_relative_position_from_img(img, smoothed_position)
-
-                        #         # Moving virtual mouse cursor
-                        #         self.output.put({
-                        #             "name": "Moving Virtual Mouse",
-                        #             "tag": "CURSOR_POINT",
-                        #             "data": [out]
-                        #         })
-
-                        #         cv2.circle(img, tuple(smoothed_position), 10, (0, 255, 0), cv2.FILLED)
-
-                        
-
+                                    camera_state.update(boundary_state.value.draw_boundary(img))
+                                    
                 except Exception as e:
                     logger.error("Hands Module Error:", e)
         finally:

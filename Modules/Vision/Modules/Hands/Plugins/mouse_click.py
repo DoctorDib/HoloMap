@@ -75,7 +75,9 @@ class mouse_click:
                             })
                             
     def mouse_down(self):
-        pyautogui.mouseDown()
+        if (self.config.get_str('MODE') == 'PRODUCTION'):
+            pyautogui.mouseDown()
         
     def mouse_up(self):
-        pyautogui.mouseUp()
+        if (self.config.get_str('MODE') == 'PRODUCTION'):
+            pyautogui.mouseUp()

@@ -67,7 +67,10 @@ class Calibration_Module(ModuleHelper):
                 #     behaviour where it triggers because the marker has a chance 
                 #     to move.
                 # Helps preventing overflow!
-                sleep(1)
+                
+                should_run = self.common_run(custom_sleep=1)
+                if (not should_run):
+                    continue
 
                 with(CalibrationFlagFactory(self.shared_state, read_only=True)) as flag_state:
                     if (not flag_state.value):
@@ -199,8 +202,8 @@ class Calibration_Module(ModuleHelper):
                         # frame = cv2.putText(frame, 'Bottom Right: ' + str(boundary_state.value.bottom_right), (500, 1000), font, fontScale, color, thickness, cv2.LINE_AA)
                         # frame = cv2.putText(frame, 'Bottom Left: ' + str(boundary_state.value.bottom_left), (500, 1050), font, fontScale, color, thickness, cv2.LINE_AA)
 
-                        with CameraFactory("calibration_camera", self.shared_state) as calibration_camera:
-                            calibration_camera.value = frame
+                        with CameraFactory("calibration_camera", self.shared_state) as camera_state:
+                            camera_state.update(frame)
             
             return (corners[0], corners[1], corners[2], corners[3])
             

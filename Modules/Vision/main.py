@@ -1,6 +1,8 @@
+import base64
 from multiprocessing import Queue
 import multiprocessing
 import os
+from time import sleep
 from API.shared_state import BoundaryBoxFactory, CameraFactory, DebugModeFlagFactory, ProjectorBoundaryBoxFactory
 import cv2
 from flask import Flask
@@ -45,6 +47,8 @@ class Vision_Module(ModuleHelper):
         # Manually set exposure and white balance if needed
         # self.detector.set(cv2.CAP_PROP_EXPOSURE, -5)  # Adjust this value as needed
         # self.detector.set(cv2.CAP_PROP_WB_TEMPERATURE, 4500)  # Adjust this value as needed
+        
+        super().prep()
 
     def run(self):
         if self.detector is None:
@@ -52,6 +56,10 @@ class Vision_Module(ModuleHelper):
 
         try:
             while not self.shutdown_event.is_set():
+                should_run = self.common_run()
+                if (not should_run):
+                    continue
+                
                 img = self.camera_stuff()
 
                 if img is not None:
@@ -71,7 +79,7 @@ class Vision_Module(ModuleHelper):
                                 img = projector_state.value.draw_boundary(img, (0, 255, 0))
                                 
                                 with CameraFactory("main_camera", self.shared_state) as camera_state:
-                                    camera_state.value = img
+                                    camera_state.update(img)
                 cv2.waitKey(1)
 
         except Exception as e:
@@ -91,7 +99,7 @@ class Vision_Module(ModuleHelper):
         flip_value = self.config.get_int('FLIP_CAMERA')
         if (flip_value > -2 and flip_value <= 1):
             img = cv2.flip(img, flip_value)
-
+        
         return img if succeed else None
 
     def send_img_via_shared_memory(self, img):

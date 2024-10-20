@@ -51,7 +51,9 @@ class ArUco_Module(ModuleHelper):
 
         try:
             while not self.shutdown_event.is_set():
-                sleep(self.timeout_buffer)
+                should_run = self.common_run()
+                if (not should_run):
+                    continue
 
                 with(CalibrationFlagFactory(self.shared_state, read_only=True)) as flag_state:
                     if (flag_state.value):
@@ -148,7 +150,7 @@ class ArUco_Module(ModuleHelper):
                                 img = boundary_state.value.draw_boundary(img)
 
                                 with CameraFactory("aruco_camera", self.shared_state) as camera_state:
-                                    camera_state.value = img
+                                    camera_state.update(img)
                     cv2.waitKey(1)
                     
                 except Exception as e:

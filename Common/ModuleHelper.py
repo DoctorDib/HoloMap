@@ -1,6 +1,8 @@
 from abc import abstractmethod
 from multiprocessing import Event, Process, Queue, shared_memory
 import multiprocessing
+import time
+from API.shared_state import HeartBeatClockFactory, ModulePluginActiveFactory
 import numpy as np
 
 from flask import Flask
@@ -33,7 +35,7 @@ class ModuleHelper(Process):
 
         self.output = output
         self.shared_state = shared_state
-
+        
         memory_size = self.config.get_int('RESOLUTION_WIDTH')*self.config.get_int('RESOLUTION_HEIGHT')*self.config.get_int('RESOLUTION_CHANELS')
         
         # Setting up modules
@@ -49,13 +51,36 @@ class ModuleHelper(Process):
         if (parent_memory_name is not None):
             self.parent_memory = shared_memory.SharedMemory(name=parent_memory_name, size=memory_size)
 
+    def common_run(self, custom_sleep = None):
+        time.sleep(self.timeout_buffer if custom_sleep is None else custom_sleep)
+        
+        with ModulePluginActiveFactory(self.name, self.shared_state, read_only=True) as active_state:
+            if (active_state.value):
+                self.heart_beat()
+                
+            return active_state.value
+
+    def heart_beat(self):
+        now = time.time()
+        if (now - self.last_heatbeat > self.heatbeat_buffer):
+            self.last_heatbeat = now
+            with HeartBeatClockFactory(self._name, self.shared_state, read_only=False) as clock:
+                clock.value = now
+                
     @abstractmethod
     def prep(self):
         """
         Prepares the module process with any custom stuff
         """
+        
+        # Default activate
+        with (ModulePluginActiveFactory(self.name, self.shared_state, read_only=False)) as activeState:
+            activeState.value = True
 
         self.timeout_buffer = self.config.get_double('TIMEOUT_BUFFER')
+        
+        self.heatbeat_buffer = self.config.get_double('HEARTBEAT_BUFFER')
+        self.last_heatbeat = 0
 
         pass
 

@@ -1,0 +1,42 @@
+.keypad--parent {
+    background-color: gray;
+    
+    margin-left:auto;
+    margin-right: auto;
+    border-radius: 10px;
+    overflow: hidden;
+    border: solid 2px black;
+
+    .input-field {
+        background-color: white;
+        border: solid 1px black;
+        color: rgb(22, 22, 22);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 28px;
+        
+        overflow-x: hidden;
+        text-align: center;
+    }    
+}
+
+.delete-key {
+    background-color: red !important;
+}
+
+.enter-key {
+    background-color: green;
+}
+
+.keypad--row {
+    display: flex;
+    justify-content: center;
+
+    .button {
+        height: 50px;
+        width: 100%;
+        font-size: 24px;
+        margin: 2px;
+    }
+}

@@ -1,6 +1,6 @@
 from multiprocessing import Queue
 from config import Config
-from flask import Flask
+from flask import Flask, Response, send_from_directory, jsonify, request
 from flask_cors import CORS
 from gevent import monkey, sleep
 
@@ -16,9 +16,9 @@ from API.Settings.routes import settings_routes_app, settings_get
 from API.Calibration.routes import create_calibration_route
 # Sockets
 from API.socket import SocketIOHandler
-from API.shared_state import SharedState
+from API.shared_state import DynamicFactory, SharedState
 # Debugging tools
-from API.camera_viewer import CameraViewerHandler
+# from Modules.Health.Plugins.HeartBeat_DebugOnly import HeartBeat_DebugOnly
 
 MainInstance : Instance = None
 
@@ -37,6 +37,82 @@ def create_flask_app(manager: SharedState):
             "settings": settings_get(),
             # "calibrations": calibration_get_all(),
         }
+
+    @app.route("/initialise-debugger", methods=['POST'])
+    def initialise_debugger():
+        
+        interested_keys = ['PcStats', '_module_heartbeat', '_is_active']
+        data = {}
+        keys = manager.keys()
+        for key in keys:
+            if any(interested_key in key for interested_key in interested_keys):
+                data[key] = manager[key]
+        
+        return {
+            "debug_mode": manager["debug_mode"],
+            "heartbeat": data
+        }
+        
+    @app.route('/get/<cameras>', methods=['GET'])
+    def get_cameras(cameras):
+        active_cameras = cameras.split(",")
+        
+        camera_states = {}
+        for active_camera in active_cameras:
+            camera_states[active_camera] = manager[active_camera]
+        
+        return jsonify(camera_states)
+    
+    @app.route('/get/camera_keys', methods=['GET'])
+    def get_camera_keys():
+        camera_keys = []
+        # Fetch all states with '_camera'
+        camera_keys = []
+        for key, _ in manager.items():
+            if key.endswith('_camera_base64'):
+                camera_keys.append(key)
+        return jsonify(camera_keys)
+
+    # Route to dynamically read a specific key from shared state
+    @app.route('/read_state/<key>', methods=['GET'])
+    def read_state(key):
+        try:
+            with DynamicFactory(key, manager, read_only=True) as state:
+                if (state.value is None):
+                    return jsonify({"message": f"Key '{key}' not found"}), 404
+                else:
+                    return jsonify({ "data": state.value, }), 200    
+        except Exception as e:
+            return jsonify({"message": e}), 400
+    
+    @app.route('/list_state_keys', methods=['GET'])
+    def list_state_keys():
+        try:
+            return jsonify({ "keys": manager.keys() }), 200    
+        except Exception as e:
+            return jsonify({"message": e}), 400
+
+    # Route to dynamically write to a specific key in shared state
+    @app.route('/write_state/<key>', methods=['POST'])
+    def write_state(key):
+        try:
+            data = request.json
+            with DynamicFactory(key, manager, read_only=False) as state:
+                state.value = data['value']
+                return jsonify({"message": f"Key '{key}' updated successfully"}), 200
+        except Exception as e:
+            return jsonify({"message": e}), 400
+        
+    # @app.route('/video_feed/<camera_key>')
+    # def video_feed(camera_key):
+    #     return Response(self.generate_frames(camera_key),
+    #                     mimetype='multipart/x-mixed-replace; boundary=frame')
+
+    @app.route('/camera_list')
+    def camera_list():
+        # Return the camera list as JSON
+        camera_list = [key for key in manager.keys() if '_camera' in key]
+        return jsonify(camera_list)
 
     return app
 
@@ -61,10 +137,6 @@ def run_server(manager):
         socketio_handler = SocketIOHandler()
         socketio_handler.start_server(app)
         socketio_handler.start_queue_processor(output)
-
-        if (debug_mode):
-            camera_handler = CameraViewerHandler()
-            camera_handler.start_server(app, managers.get_shared_state())
 
         # Modules system for vision
         base_folder_path = os.path.dirname(os.path.abspath(__file__)) + "/Modules"

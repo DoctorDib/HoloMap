@@ -1,0 +1,62 @@
+
+.logs-container-wrapper {
+    height: 650px;
+
+    .logs-container {
+        overflow-y: scroll;
+        padding: 10px;
+        height: 100%;
+        overflow-y: auto;
+        
+
+        .log {
+            display: flex;
+            
+            border-bottom: 1px solid black;
+            padding: 5px;
+    
+            &:hover {
+                background-color: #2c254d;
+                border-radius: 10px;;
+            }
+    
+            .type {
+                margin-right: 10px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+    
+            .content {
+                display: flex;
+                flex-direction: column;
+                width: 100%;
+    
+                .message {
+                    width: 90%;
+                    font-size: 1em;
+                    display: flex;
+                    flex-wrap: wrap;
+                }
+                
+                .date {
+                    display: flex;
+                    justify-content: flex-end;
+                    font-size: .7em;
+                } 
+            }
+        }
+    }
+    
+    .scroll-to-bottom {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        border: none;
+        padding: 10px;
+        border-radius: 100%;
+        width: 50px !important;
+        height: 50px !important;
+        z-index: 1; // Ensure the button is above the content
+    }
+}

@@ -63,3 +63,6 @@ def get_logs():
     temp_logs.extend(stored_logs)
     stored_logs.clear()
     return json.dumps(temp_logs)
+
+def get_stored_logs():
+    return LOGSDataHandler().get_logs()

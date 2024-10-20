@@ -1,7 +1,7 @@
 from multiprocessing import Queue
 import multiprocessing
 from time import sleep
-from API.shared_state import BoundaryBoxFactory, CalibrationFlagFactory, CameraFactory, DebugModeFlagFactory
+from API.shared_state import BoundaryBoxFactory, CalibrationFlagFactory, CameraFactory, DebugModeFlagFactory, ModulePluginActiveFactory
 from Common.KalmanFilter import KalmanFilter
 from flask import Flask
 
@@ -50,12 +50,15 @@ class QR_Module(ModuleHelper):
         self.detection_counter = 0
 
     # Called from the main thread
-    def run(self):    
+    def run(self):
         if (self.detector is None):
             self.prep()
 
         try:
             while not self.shutdown_event.is_set():
+                should_run = self.common_run()
+                if (not should_run):
+                    continue
 
                 with CalibrationFlagFactory(self.shared_state, read_only=True) as flag_instance:
                     # Don't run if calibrating
@@ -137,7 +140,7 @@ class QR_Module(ModuleHelper):
                         with DebugModeFlagFactory(self.shared_state, read_only=True) as flag_state:
                             if (flag_state.value):
                                 with CameraFactory("qr_camera", self.shared_state) as camera_state:
-                                    camera_state.value = img
+                                    camera_state.update(img)
                         cv2.waitKey(1)
                     
                 except Exception as e:

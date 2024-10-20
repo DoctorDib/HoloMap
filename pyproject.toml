@@ -19,6 +19,8 @@ qrdet = "^2.5"
 handtrackingmodule = "^0.2"
 watchdog = "^5.0.3"
 pyautogui = "^0.9.54"
+psutil = "^6.1.0"
+gputil = "^1.4.0"
 
 
 [build-system]

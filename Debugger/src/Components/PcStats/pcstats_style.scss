@@ -1,0 +1,54 @@
+.pc-stats-container {
+    width: 100%;
+    display: flex;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    border-radius: 10px;
+    margin: 10px;
+    padding: 30px;
+    height: auto;
+
+    .chart {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        width: 100%;
+
+        .pair-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: row;
+            width: 60px;
+        }
+
+        .center-container {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            
+            .title {
+                font-size: 1.5em;
+                opacity: .5;
+            }
+    
+            .value {
+                font-size: 1.2em;
+                opacity: .75;
+            }
+        }
+    }
+
+    .info {
+        font-size: 1.2em;
+        margin: 5px; 
+    }
+}

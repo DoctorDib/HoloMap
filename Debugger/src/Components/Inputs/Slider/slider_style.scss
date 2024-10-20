@@ -1,0 +1,15 @@
+.slider-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+
+    .slider {
+        width: 100%;
+        margin: 10px 0;
+    }
+    .slider-value {
+        margin-top: 5px;
+    }
+}
+  
