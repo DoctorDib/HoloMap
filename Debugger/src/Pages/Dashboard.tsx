@@ -152,7 +152,7 @@ const LandingPage = forwardRef((): React.ReactElement => {
             </div>
             <div className={'section-parent'} style={{ flexDirection: 'column', flexGrow: 0 }}>
                 <div className={'section'} style={{ flexGrow: 0, background:'#2c254d'}}>
-                    <img src="http://localhost:5002/favicon-transparent.png" style={{ width:'200px', height:'auto', margin: '20px 10px', justifyContent: 'center', alignItems: 'center' }} />
+                    <img src={`http://${window.location.hostname}:5002/favicon-transparent.png`} style={{ width:'200px', height:'auto', margin: '20px 10px', justifyContent: 'center', alignItems: 'center' }} />
                 </div>
 
                 <div className={'section'} style={{ flexGrow: 1 }}>

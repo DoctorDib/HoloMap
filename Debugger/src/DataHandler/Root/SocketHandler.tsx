@@ -12,7 +12,7 @@ interface SocketInterface {
 const createSocket = (): Socket => {
     // const utestrl = window.location.origin;
     // TODO - Store this socket in the redux store?
-    const socket: Socket = io('localhost:5001');
+    const socket: Socket = io(`${window.location.hostname}:5001`);
     
     socket.on('connect', (): void => {
         console.log('Connected to the server!');
