@@ -29,7 +29,7 @@ const CameraManagerComponent = ({ isFullScreen }: CameraManagerInterface): React
 
     const fetchCameraImages = async () => {
         try {
-            const response = await axios.get('http://localhost:5000/get/' + Object.keys(activeCamera).join(','));
+            const response = await axios.get(`http://${window.location.hostname}:5000/get/` + Object.keys(activeCamera).join(','));
 
             const data = response.data;
             setCameraStates(data);
@@ -40,7 +40,7 @@ const CameraManagerComponent = ({ isFullScreen }: CameraManagerInterface): React
 
     const fetchCameraKeys = async () => {
         try {
-            const response = await axios.get('http://localhost:5000/get/camera_keys');
+            const response = await axios.get(`http://${window.location.hostname}:5000/get/camera_keys`);
 
             const data = response.data;
             if (data.length !== cameraLabels.length) {

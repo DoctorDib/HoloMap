@@ -32,7 +32,7 @@ export const initialiseDataRequest = async (loadSocket = true): Promise<any> => 
 
 export const ReadState = async (key: string): Promise<any> => {
     try {
-        const response = await fetch(`http://localhost:5000/read_state/${key}`);
+        const response = await fetch(`http://${window.location.hostname}:5000/read_state/${key}`);
         const data = await response.json();
 
         // Saving data
@@ -47,7 +47,7 @@ export const ReadState = async (key: string): Promise<any> => {
 
 export const WriteState = async (key: string, value: any): Promise<any> => {
     try {
-        const response = await fetch(`http://localhost:5000/write_state/${key}`, {
+        const response = await fetch(`http://${window.location.hostname}:5000/write_state/${key}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
