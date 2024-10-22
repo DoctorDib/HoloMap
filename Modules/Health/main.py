@@ -15,17 +15,16 @@ class Health_Module(ModuleHelper):
                 app: Flask = None, output: Queue = None, shared_state: multiprocessing.managers.SyncManager.dict = None):
 
         super().__init__("Health", parent_memory_name=memory_name, app=app, output=output, shared_state=shared_state)
-        # super().__init__("Vision", True, self.base_folder_path, "Modules.Vision.Modules.{0}.main.{0}_Module", app=app, output=output, shared_state=shared_state)
-
 
     def prep(self):
         root_path = os.path.dirname(__file__)
         self.plugin_manager = PluginLoader(root_path, self.shared_state, self.output)
         self.plugin_manager.monitor_plugins() # Watching for new or removed plugins
         
+        super().prep()
+        
     def run(self):
-        if self.detector is None:
-            self.prep()
+        self.prep()
 
         try:
             while not self.shutdown_event.is_set():
@@ -48,5 +47,4 @@ class Health_Module(ModuleHelper):
             logger.error(e)
         finally:
             logger.info("Shutting down")
-            self.detector.release()
             cv2.destroyAllWindows()
