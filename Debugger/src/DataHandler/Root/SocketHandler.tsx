@@ -44,7 +44,7 @@ const RootSocketActions = (parsedData: SocketInterface): void => {
         case 'HEARTBEAT':
             return getStore().dispatch({
                 type: DataActionEnum.Update_HeartBeat,
-                data: parsedData.data,
+                data: parsedData,
             });
     }
 };

@@ -175,4 +175,24 @@
             font-size: 25px;
         }
     }
+
+
+
+
+
+    .main-area {
+        // display: flex;
+        // width: 100% !important;
+        background-color: paleturquoise !important;
+        flex-grow: 1;
+        height: 100%;
+    }
+    
+    .top-toolbar {
+
+        // display: flex;
+        background-color: blue;
+        flex-grow: 1;
+        // height: 100%;
+    }   
 }

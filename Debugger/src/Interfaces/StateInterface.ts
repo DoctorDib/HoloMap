@@ -1,4 +1,5 @@
 import { Socket } from 'socket.io-client';
+import { PagesEnum } from '../Common/enumerations';
 
 interface StateTypes {
     root: RootTypes,
@@ -6,10 +7,50 @@ interface StateTypes {
 }
 
 interface RootTypes {
+    initialTime: number,
     socket?: Socket,
     debug_mode: boolean,
     heartbeat: HeartBeat
-    logs: Logs
+    modules: Modules
+    logs: Logs,
+    currentPage: PagesEnum,
+    viewModule: string,
+    cached_modules: Modules,
+}
+
+interface Modules {
+    [key: string]: Module
+}
+
+interface Module {
+    Name: string,
+    Path: string,
+    LastUpdated: number,
+    ModuleParentName: string,
+
+    State: string,
+
+    Paused: boolean,
+
+    ScheduledInitModules: ScheduleEvents
+    ScheduledShutdownModules: ScheduleEvents
+    ScheduledPauseModules: ScheduleEvents
+    ScheduledReloadModules: ScheduleEvents
+    ScheduledResumeModules: ScheduleEvents
+    
+    // TODO - Support module logs to be the same as the interface logs
+    // e.g. Array<Logs>
+    Logs: Array<Log>,
+
+    // Only used on the TypeScript side
+    Children?: Module[]
+}
+
+interface ScheduleEvents {
+    Name: string,
+    IsScheduled: boolean,
+    Time: number,
+    Count: number,
 }
 
 interface HeartBeat {
@@ -35,7 +76,7 @@ interface PCStats {
     DiskInfo: Array<DiskStats>
     NetworkInfo: NetworkStats
     GpuInfo: Array<GPUStat>
-    TimeStamp: string
+    TimeStamp: number
 }
 
 interface SystemStats {
@@ -130,6 +171,10 @@ export {
     // Logging
     Logs,
     Log,
+
+    // Modules
+    Modules,
+    Module,
 
     // Notification pop ups
     NotificationTypeInterface,

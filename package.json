@@ -1,5 +1,6 @@
 {
   "dependencies": {
-    "@visx/visx": "^3.11.0"
+    "@visx/visx": "^3.11.0",
+    "react-sortable-tree": "^2.8.0"
   }
 }

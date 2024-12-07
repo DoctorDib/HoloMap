@@ -1,6 +1,8 @@
 from multiprocessing import Queue
+from Common.ModuleSharedState import ModuleSharedState
+from Common.Modules_Handler import Modules_MultiProcess
 from config import Config
-from flask import Flask, Response, send_from_directory, jsonify, request
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 from gevent import monkey, sleep
 
@@ -10,13 +12,12 @@ import os, multiprocessing
 
 # COMMON
 from Common.Classes.instance import Instance
-from Common.Modules import Modules
 # PAGE IMPORTS
 from API.Settings.routes import settings_routes_app, settings_get
 from API.Calibration.routes import create_calibration_route
 # Sockets
 from API.socket import SocketIOHandler
-from API.shared_state import DynamicFactory, SharedState
+from API.shared_state import DynamicFactory, ModuleSharedStateFactory, SharedState
 # Debugging tools
 # from Modules.Health.Plugins.HeartBeat_DebugOnly import HeartBeat_DebugOnly
 
@@ -41,16 +42,25 @@ def create_flask_app(manager: SharedState):
     @app.route("/initialise-debugger", methods=['POST'])
     def initialise_debugger():
         
-        interested_keys = ['PcStats', '_module_heartbeat', '_is_active']
+        interested_keys = ['PcStats', '_module']
         data = {}
+        modules = {}
         keys = manager.keys()
         for key in keys:
             if any(interested_key in key for interested_key in interested_keys):
-                data[key] = manager[key]
-        
+                
+                value = manager[key]
+                if (isinstance(value, ModuleSharedState)):
+                    # Custom as I want to return module json data
+                    modules[key] = value.to_json()
+                else:
+                    data[key] = manager[key]
+                    
         return {
             "debug_mode": manager["debug_mode"],
-            "heartbeat": data
+            "start_time": manager["start_time"],
+            "heartbeat": data,
+            "modules": modules,
         }
         
     @app.route('/get/<cameras>', methods=['GET'])
@@ -83,14 +93,14 @@ def create_flask_app(manager: SharedState):
                 else:
                     return jsonify({ "data": state.value, }), 200    
         except Exception as e:
-            return jsonify({"message": e}), 400
+            return jsonify({"message": str(e)}), 400
     
     @app.route('/list_state_keys', methods=['GET'])
     def list_state_keys():
         try:
             return jsonify({ "keys": manager.keys() }), 200    
         except Exception as e:
-            return jsonify({"message": e}), 400
+            return jsonify({"message": str(e)}), 400
 
     # Route to dynamically write to a specific key in shared state
     @app.route('/write_state/<key>', methods=['POST'])
@@ -101,13 +111,68 @@ def create_flask_app(manager: SharedState):
                 state.value = data['value']
                 return jsonify({"message": f"Key '{key}' updated successfully"}), 200
         except Exception as e:
-            return jsonify({"message": e}), 400
-        
-    # @app.route('/video_feed/<camera_key>')
-    # def video_feed(camera_key):
-    #     return Response(self.generate_frames(camera_key),
-    #                     mimetype='multipart/x-mixed-replace; boundary=frame')
+            return jsonify({"message": str(e)}), 400
 
+
+    # MODULE STATES
+    @app.route('/get/modules', methods=['GET'])
+    def get_modules():
+        try:
+            interested_keys = ['_module']
+            
+            modules = {}
+            keys = manager.keys()
+            for key in keys:
+                if any(interested_key in key for interested_key in interested_keys):
+                    value = manager[key]
+                    if (isinstance(value, ModuleSharedState)):
+                        # Custom as I want to return module json data
+                        modules[key] = value.to_json()
+                        
+            return jsonify({ "modules": modules }), 200    
+        except Exception as e:
+            return jsonify({"message": str(e)}), 400
+        
+    @app.route('/get/module/<key>', methods=['GET'])
+    def get_module(key):
+        try:
+            with ModuleSharedStateFactory(key, manager, read_only=True) as state:
+                if (state.value is not None):
+                    data = state.value.to_json()
+                    return { key: data }, 200    
+                else:
+                    return jsonify({ "success": False }), 400    
+        except Exception as e:
+            return jsonify({"message": str(e)}), 400
+        
+    @app.route('/set/module/<key>', methods=['POST'])
+    def set_module_value(key):
+        try:
+            data = request.json
+            command = data['value']
+            
+            with ModuleSharedStateFactory(key, manager, read_only=False) as state:
+                match (command):
+                    case "initialise":
+                        state.value.initialise()
+                    case "stop":
+                        state.value.stop()
+                    case "pause":
+                        state.value.pause()
+                    case "play":
+                        state.value.play()
+                    case "reload":
+                        state.value.reload()
+                    case '_':
+                        return jsonify({"message": f"{command} is not a valid command for {key}"}), 400
+                        
+                return jsonify({"message": f"Key '{key}' updated successfully"}), 200
+                
+        except Exception as e:
+            return jsonify({"message": str(e)}), 400
+        
+        
+    # CAMERAS
     @app.route('/camera_list')
     def camera_list():
         # Return the camera list as JSON
@@ -137,20 +202,24 @@ def run_server(manager):
         socketio_handler = SocketIOHandler()
         socketio_handler.start_server(app)
         socketio_handler.start_queue_processor(output)
-
-        # Modules system for vision
-        base_folder_path = os.path.dirname(os.path.abspath(__file__)) + "/Modules"
-        modules = Modules(base_folder_path, "Modules.{0}.main.{0}_Module")
-
-        modules.initialise(None, memory_size= Config().get_int('RESOLUTION_WIDTH') * Config().get_int('RESOLUTION_HEIGHT') * Config().get_int('RESOLUTION_CHANELS'), output=output, shared_state=managers.get_shared_state())
-
+        
+        base_folder_path = os.path.dirname(os.path.abspath(__file__))
+        main_module_processor = Modules_MultiProcess(base_folder_path, "Main.main.{0}_Module", "main", 0, output=output, shared_state=managers.get_shared_state())
+        main_module_processor.initialise()
+        
+        # API Server
         eventlet.wsgi.server(eventlet.listen(('0.0.0.0', 5000)), app)
-
-        while(True):
-            sleep(1)
+        
+        try:
+            while(True):
+                print("A")
+                sleep(1)
+        except KeyboardInterrupt:
+            print('interrupted!')
     except KeyboardInterrupt:
         pass
-    # finally:
+    finally:
+        MainInstance.shutdown()
         # modules.shutdown()
         # print("Shutting down the modules")
         # modules.shutdown()
@@ -161,6 +230,7 @@ def run_server(manager):
         #camera_handler.shutdown()?????
 
         # socketio_handler.shutdown()
+
 
 if __name__ == "__main__":
     print("\n\n==========================================================================\n")

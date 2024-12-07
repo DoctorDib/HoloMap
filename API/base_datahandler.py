@@ -169,6 +169,17 @@ class BaseDataHandler:
         except sqlite3.Error as er:
             self.print_sql_error(_class, er)
 
+    def get_sorted(self, _class : any, _key : str, _limit : int, _where_condition : list[list[str]] = None, column_to_sort_by: str = "", ascending: bool = True, get_multiple = True):
+        try:
+            limit = "" if _limit is None else "LIMIT {0}".format(_limit)
+            where_condition = self.format_where_condition(_where_condition)
+            results = self.command.execute('SELECT {0} FROM {1} {2} ORDER BY {3} {4} {5}'.format(_key, _class._table, where_condition, column_to_sort_by, "ASC" if ascending else "DESC", limit))
+            if (get_multiple):
+                return results.fetchall()
+            return results.fetchone()
+        except sqlite3.Error as er:
+            self.print_sql_error(_class, er)
+
     def insert_data(self, _class : any, _columns : list[str], _values : list[object]):
         try:
             # print('INSERT INTO {0} {1} VALUES {2}'.format(_class._table, _columns, _values))

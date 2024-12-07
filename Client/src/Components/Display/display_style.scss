@@ -1,12 +1,44 @@
+#main-content {
+    background-color: red;   
+}
+
 .projection-content {
-    width: 100%; 
-    height: 100%; 
-    display: flex; 
-    justify-content: center; 
-    align-items: center; 
+    background-color: purple;
+    // width: 100%; 
+    // height: 100%; 
+    // display: flex; 
+    // justify-content: center; 
+    // align-items: center; 
 
     background-color: rgb(43, 43, 43);
     
     // Tempoary border for development
     border: 2px solid white;
+
+    display: flex;
+    flex-direction: column;
+
+    .test {
+        display: flex;
+        // height: 100%;
+        // width: 100%;
+        flex-direction: column;
+        background-color: yellow;
+
+        .main-area {
+            // display: flex;
+            // width: 100% !important;
+            background-color: paleturquoise;
+            // flex-grow: 1;
+            // height: 100%;
+        }
+        
+        .top-toolbar {
+
+            // display: flex;
+            background-color: blue;
+            // flex-grow: 1;
+            // height: 100%;
+        }   
+    }
 }

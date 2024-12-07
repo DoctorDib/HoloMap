@@ -12,11 +12,13 @@ class ProcessInstance:
         self.process = Process(target=self._action, args=(self.queue, self.system_command_queue, self.shutdown_event))
         self.initialise(_key, _action, args)
 
+    def get_process(self):
+        return self.process
+
     def initialise(self, _key, _action, args_input=None):
         try:
             if args_input is not None:
                 self.queue.put(args_input)  # Pass arguments to process if needed
-
             self.start()
         except Exception as e:
             logger.exception(e)
@@ -34,7 +36,6 @@ class ProcessInstance:
         #self.process.join()  # Wait for the process to exit
 
 class ProcessController:
-    processes = {}
 
     def __init__(self):
         self.initialise()
@@ -43,9 +44,7 @@ class ProcessController:
         self.processes = {}
 
     def new_process(self, _key, _action, args = None):
-        print(5)
         if (_key in self.processes):
-            print(6)
             if (not self.processes[_key].is_running):
                 self.processes[_key].start()
             logger.warning("Multiple key process attempt detected")
@@ -54,13 +53,12 @@ class ProcessController:
             return
 
         new_multiple_process = ProcessInstance(_key, _action, args)
-        self.add_process(_key, new_multiple_process)
+        self.add_process(_key, process=new_multiple_process.get_process())
 
     def add_process(self, _key, process):
-        self.processes.update({_key: process})
-    
+        self.processes[_key] = process
+        
     def stop(self, _key):
-        print("Stopping: ", _key)
         self.processes[_key].stop()
 
     def remove_thread(self, _key):

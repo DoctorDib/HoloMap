@@ -7,6 +7,7 @@
     align-content: center;
     align-items: center;
     flex-direction: column;
+    box-sizing: border-box;
 
     .header {
         display: flex;
@@ -84,8 +85,8 @@
     .main-container {
         display: flex;
         flex-direction: row;
-        width: 100vw;
-        height: 100vh;
+        width: 97vw;
+        height: 97vh;
 
         color: #333333;
         
@@ -125,6 +126,21 @@
                 overflow: hidden;
                 transition: all 0.5s ease-in-out; /* Add smooth transition */
                 box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+
+                .main-window-view-button-hotbar {
+                    position: absolute;
+                    right: 0;
+                    bottom: 0;
+                    margin: 25px;
+                    display: flex;
+
+                    .toggle-button {
+                        border-radius: 100px;
+                        margin: 10px;
+                        width: 50px;
+                        height: 50px;
+                    }
+                }
 
                 .navigation-button-container {
                     display: flex;
@@ -214,7 +230,7 @@
         .header {
             background-color: purple;
             height: 5vh !important;
-            width: 100%;
+            width: 100vw;
             position: relative;
             display: flex;
 
@@ -257,9 +273,12 @@
                 button {
                     width: 10vw;                
                 }
-
-                
             }
         }
     }
+}
+
+.main-process-info {
+    width: 100%;
+    height: 100%;
 }

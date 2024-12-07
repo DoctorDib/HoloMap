@@ -1,17 +1,17 @@
 import { NotificationTypeInterface } from '../Interfaces/StateInterface';
 
-const LogType = {
+export const LogType = {
     Default: 'DEFAULT',
     Error: 'ERROR',
     Warning: 'WARNING',
     UserInput: 'USER_INPUT',
 };
 
-const PageEnum = {
+export const PageEnum = {
     Dashboard: 0,
 };
 
-const DataActionEnum = {
+export const DataActionEnum = {
     // Misc
     LOAD: '11',
     LOAD_SUCCESS: '12',
@@ -28,25 +28,55 @@ const DataActionEnum = {
     // MISC
     Write_State: '30',
     Read_State: '31',
-    Update_HeartBeat:'32'
+    Update_HeartBeat:'32',
+    Update_Cached_Modules: '33',
+
+    // System
+    Update_Page: '40',
+    View_Module: '41',
 };
 
 
-const NotificationActionEnums = {
+export const NotificationActionEnums = {
     NewNotification: '0',
 };
 
-const NotificationTypes: NotificationTypeInterface = {
+export const NotificationTypes: NotificationTypeInterface = {
     Info: 0,
     Success: 1,
     Warning: 2,
     Error: 3,
 };
 
-export {
-    LogType,
-    PageEnum,
-    DataActionEnum,
-    NotificationTypes,
-    NotificationActionEnums,
-};
+export enum PagesEnum {
+    Logs = 0,
+    SelectedModule = 1,
+    Camera = 2,
+}
+
+export enum ModuleStateEnum {
+    SET_INIT = "SET_INIT_EVENT",
+    INITIALISING = "INITIALISING",
+    
+    RUNNING = "RUNNING",
+    
+    RESUMING = "RESUMING",
+    
+    SET_PAUSE = "SET_PAUSE_EVENT",
+    PAUSING = "PAUSING",
+    PAUSED = "PAUSED",
+    
+    SET_STOP = "SET_STOP_EVENT",
+    STOPPING = "STOPPING",
+    STOPPED = "STOPPED",
+    
+    SET_RELOAD = "SET_RELOAD",
+    RELOADING = "RELOADING",
+    RELOADED = "RELOADED",
+
+    ERRORED = "ERRORED",
+    DISABLED = "DISABLED",
+    MISSING = "MISSING",
+    
+    NULL = "NULL",
+}

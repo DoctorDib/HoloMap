@@ -1,15 +1,21 @@
 import React, { useEffect, useRef, useState } from 'react';
 import './logs_style.scss';
 import { useSelector } from 'react-redux';
-import { Log, Logs, StateTypes } from '../../Interfaces/StateInterface';
+import { Log, Logs, Modules, StateTypes } from '../../Interfaces/StateInterface';
 import Icons from '../../Common/Icons';
 import ButtonComponent from '../Inputs/Button';
+import ToggleButtonComponent from '../Inputs/ToggleButton';
+import LogItemComponent from './log-item';
 
 const LogsComponent = (): React.ReactElement => {
     const logs: Logs = useSelector((state: StateTypes): StateTypes => state).root.logs;
+    const modules: Modules = useSelector((state: StateTypes): StateTypes => state).root.modules;
     const [autoScroll, setAutoScroll] = useState(true); // State to manage auto-scroll
     const [showScrollButton, setShowScrollButton] = useState(false); // State to manage scroll-to-bottom button visibility
     const logsContainerRef = useRef<HTMLDivElement>(null); // Ref for the logs container
+
+    const [logData, setLogData] = useState<Log[]>([]);
+    const [selectedModule, setSelectedModule] = useState<string>('All');
 
     const getSymbol = (type: string) => {
         switch (type) {
@@ -75,30 +81,45 @@ const LogsComponent = (): React.ReactElement => {
         }
     };
 
+    useEffect(() => {
+        if (selectedModule === 'All') {
+            setLogData(logs?.Logs);
+        } else {
+            setLogData(modules[selectedModule].Logs);
+        }
+    }, [selectedModule, logs, modules]);
+
     return (
-        <div className={'logs-container-wrapper'}>
-            <div
-                className={"logs-container"}
-                ref={logsContainerRef}
-                onScroll={handleScroll} // Add onScroll handler
-            >
-                {logs?.Logs?.map((log: Log, index) => (
-                    <div className={"log"} key={index}>
-                        <div className={"type"} style={{ color: getSymbolColour(log.type) }}>
-                            {getSymbol(log.type)}
+        <div className={'log-container'}>
+            <div className={'log-item-list'}> 
+                <ToggleButtonComponent Text={'All'} OnClick={() => setSelectedModule('All')}
+                    IsActive={selectedModule === 'All'}/>
+
+                {
+                    Object.keys(modules).map((key: string) => (
+                        <div className={'module-button'}>
+                            <ToggleButtonComponent Text={key.replace('_module', '')} 
+                                OnClick={() => setSelectedModule(key)}
+                                IsActive={selectedModule === key}/>
                         </div>
-                        <div className={"content"}>
-                            <div className={"message"}>{log.message}</div>
-                            <div className={"date"}>{formatTimestamp(log.date)}</div>
-                        </div>
-                    </div>
-                ))}
+                    ))
+                }
             </div>
-            
-            {/* Scroll to bottom button */}
-            {showScrollButton && (
-                <ButtonComponent Icon={Icons.ArrowDown} ClassName={'scroll-to-bottom'} OnClick={scrollToBottom} />
-            )}
+
+            <div className={'logs-container-wrapper'}>
+                <div
+                    className={"logs-container"}
+                    ref={logsContainerRef}
+                    onScroll={handleScroll} // Add onScroll handler
+                >
+                    <LogItemComponent Logs={logData} />
+                </div>
+                
+                {/* Scroll to bottom button */}
+                {showScrollButton && (
+                    <ButtonComponent Icon={Icons.ArrowDown} ClassName={'scroll-to-bottom'} OnClick={scrollToBottom} />
+                )}
+            </div>`
         </div>
     );
 };

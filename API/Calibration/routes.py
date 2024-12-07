@@ -1,4 +1,4 @@
-from Modules.Vision.BoundaryBox import BoundaryBox
+from Main.Modules.Vision.BoundaryBox import BoundaryBox
 from flask import Blueprint, request
 
 from API.Calibration.datahandler import CalibrationDataHandler

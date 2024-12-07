@@ -1,62 +1,100 @@
+.log-container {
+    display: flex;
+    background-color: #3b3051;
+    box-sizing: border-box;
+    width: 95%;
+    height: 95%;
+    border-radius: 10px;
+    overflow: hidden;
 
-.logs-container-wrapper {
-    height: 650px;
+    .log-item-list {
+        background-color: #2c254d;
+        width: 20%;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        align-content: center;
 
-    .logs-container {
-        overflow-y: scroll;
-        padding: 10px;
-        height: 100%;
-        overflow-y: auto;
-        
+        .toggle-button {
+            box-sizing: border-box;
+            height: 60px;
+            width: 80%;
+            margin: 10px;
+        }
 
-        .log {
-            display: flex;
-            
-            border-bottom: 1px solid black;
-            padding: 5px;
-    
-            &:hover {
-                background-color: #2c254d;
-                border-radius: 10px;;
-            }
-    
-            .type {
-                margin-right: 10px;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-            }
-    
-            .content {
-                display: flex;
-                flex-direction: column;
+        .module-button {
+            width: 80%;
+            margin: 5px;
+
+            .toggle-button {
+                height: 30px;
+                margin: 0;
                 width: 100%;
-    
-                .message {
-                    width: 90%;
-                    font-size: 1em;
-                    display: flex;
-                    flex-wrap: wrap;
-                }
-                
-                .date {
-                    display: flex;
-                    justify-content: flex-end;
-                    font-size: .7em;
-                } 
             }
         }
     }
+
+    .logs-container-wrapper {
+        width: 100%;
+
+        .logs-container {
+            overflow-y: scroll;
+            padding: 10px;
+            height: 100%;
+            overflow-y: auto;
+            box-sizing: border-box;
+        }
+        
+        .scroll-to-bottom {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            border: none;
+            padding: 10px;
+            border-radius: 100%;
+            width: 50px !important;
+            height: 50px !important;
+            z-index: 1; // Ensure the button is above the content
+        }
+    }
+}
+
+// Needs to be independent so it can be used elsewhere
+.log {
+    display: flex;
     
-    .scroll-to-bottom {
-        position: absolute;
-        bottom: 10px;
-        right: 10px;
-        border: none;
-        padding: 10px;
-        border-radius: 100%;
-        width: 50px !important;
-        height: 50px !important;
-        z-index: 1; // Ensure the button is above the content
+    border-bottom: 1px solid black;
+    padding: 5px;
+
+    &:hover {
+        background-color: #2c254d;
+        border-radius: 10px;;
+    }
+
+    .type {
+        margin-right: 10px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .content {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+
+        .message {
+            width: 90%;
+            font-size: 1em;
+            display: flex;
+            flex-wrap: wrap;
+        }
+        
+        .date {
+            display: flex;
+            justify-content: flex-end;
+            font-size: .7em;
+        } 
     }
 }

@@ -1,6 +1,7 @@
 import * as utils from '../handler';
-import { DataActionEnum } from '../../Common/enumerations';
+import { DataActionEnum, PagesEnum } from '../../Common/enumerations';
 import { getStore } from '../../Stores/store';
+import { Modules } from '../../Interfaces/StateInterface';
 
 export const initialiseDataRequest = async (loadSocket = true): Promise<any> => { 
     getStore().dispatch({ type: DataActionEnum.LOAD });
@@ -14,8 +15,10 @@ export const initialiseDataRequest = async (loadSocket = true): Promise<any> => 
     const newData: any = {
         type: DataActionEnum.LOAD_SUCCESS,
 
+        initialTime: data.start_time,
         debug_mode: data.debug_mode,
         heartbeat: data.heartbeat,
+        modules: data.modules,
         
         isError: false,
     };
@@ -77,4 +80,44 @@ export const WriteState = async (key: string, value: any): Promise<any> => {
         console.error('Error writing to the shared state:', error);
         return null;
     }
+};
+
+export const WriteModuleSharedState = async (key: string, command: string): Promise<any> => {
+    try {
+        const response = await fetch(`http://${window.location.hostname}:5000/set/module/${key}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ value: command }),
+        });
+
+        if (!response.ok) {
+            // Handle error response from server
+            const errorData = await response.json();
+            console.error('Error writing to the shared state:', errorData);
+            return;
+        }
+        
+        const data = await response.json(); // Get response data if needed
+
+        initialiseDataRequest(false);
+        
+        return data;
+    } catch (error) {
+        console.error('Error writing to the shared state:', error);
+        return null;
+    }
+};
+
+export const ChangePage = async (pageEnum: PagesEnum) => {
+    getStore().dispatch({ type: DataActionEnum.Update_Page, data: pageEnum });
+};
+
+export const ShowModuleInfo = async (module: string) => {
+    getStore().dispatch({ type: DataActionEnum.View_Module, data: module });
+};
+
+export const UpdateCachedModules = async (modules: Modules) => {
+    getStore().dispatch({ type: DataActionEnum.Update_Cached_Modules, data: modules });
 };

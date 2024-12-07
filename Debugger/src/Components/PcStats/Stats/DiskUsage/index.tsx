@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Bar, Doughnut } from 'react-chartjs-2';
+import React from 'react';
+import { Bar } from 'react-chartjs-2';
 import {
     Chart as ChartJS,
     CategoryScale,
@@ -88,10 +88,6 @@ const DiskUsageComponent = (): React.ReactElement => {
             },
         ],
     };
-
-    useEffect(() => {
-        console.log(disk?.map((disk: DiskStats) => disk?.Usage?.PercentUsed))
-    }, [disk]);
 
     return <>
         <div className={'stat-item'} style={{ width: '200px', height: '200px' }}>

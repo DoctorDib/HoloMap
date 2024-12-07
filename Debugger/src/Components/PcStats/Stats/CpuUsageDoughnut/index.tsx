@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Bar, Doughnut } from 'react-chartjs-2';
 import {
     Chart as ChartJS,
@@ -14,8 +14,6 @@ import {
 import '../../pcstats_style.scss';
 import { useSelector } from 'react-redux';
 import { CpuStats, StateTypes } from '../../../../Interfaces/StateInterface';
-import { parse } from 'path';
-import { faLessThanEqual } from '@fortawesome/free-solid-svg-icons';
 
 //https://react-chartjs-2-two.vercel.app/
 
@@ -114,10 +112,6 @@ const CpuUsageDoughnutComponent = (): React.ReactElement => {
             },
         ],
     };
-
-    useEffect(() => {
-        console.log(cpu?.CpuUsagePerCore.map((usage: string) => parseFloat(usage.replace('%', ''))));
-    },[cpu]);
 
     return <>
         <div className={'stat-item'} style={{ width: '250px', height: '250px' }}>

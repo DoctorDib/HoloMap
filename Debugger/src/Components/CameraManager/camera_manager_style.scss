@@ -18,6 +18,10 @@
         justify-items: center; /* Center items inside each grid cell horizontally */
         align-items: center; /* Center items inside each grid cell vertically */
         border-radius: 15px;
+
+        display: flex;
+        flex-direction: row;
+        height: 100%;
         
         .refresh-rate-container {
             position: absolute;
@@ -30,15 +34,15 @@
             display: flex;
             flex-direction: column;
 
-            width: 80%; /* Responsive images */
+            width: 350px; /* Responsive images */
             height: auto; /* Maintain aspect ratio */
             border-radius: 10px; /* Optional: rounded corners */
             overflow: hidden;
             max-width: 600px;
             margin: 20px;
 
-            img {
-                
+            .toggle-button {
+                border-radius: 0 0 10px 10px;
             }
 
             .image-title {

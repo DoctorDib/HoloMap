@@ -44,7 +44,6 @@ class Config():
                 return self.cached_data[key]
             else:
                 new_data = float(os.getenv(key))  # Use float to handle double precision
-                print(f"{key}: {new_data}")
                 self.cached_data.update({key: new_data})
                 return new_data
         except Exception as e:
@@ -56,7 +55,6 @@ class Config():
                 return self.cached_data[key]
             else:
                 new_data = int(os.getenv(key))
-                print(f"{key}: {new_data}")
                 self.cached_data.update({key: new_data})
                 return new_data
         except Exception as e:
@@ -67,7 +65,6 @@ class Config():
             if (key in self.cached_data):
                 return self.cached_data[key]
             else:
-                print("attempign to get ", key)
                 new_data = str(os.getenv(key))
                 self.cached_data.update({key: new_data})
                 return new_data

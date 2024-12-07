@@ -1,11 +1,20 @@
 import base64
+import datetime
+import time
+from Common.ModuleSharedState import ModuleSharedState
 import cv2
-from Modules.Vision.Modules.Hands.hands_control import HandsControl
+from Main.Modules.Vision.Modules.Hands.hands_control import HandsControl
 import multiprocessing, numpy
 
-from Modules.Vision.BoundaryBox import BoundaryBox
+from Main.Modules.Vision.BoundaryBox import BoundaryBox
 
 import logger
+
+# from typing import TYPE_CHECKING
+
+# if TYPE_CHECKING:
+#     # Only importing for type checking
+#     from Common.ModuleHelper import ModuleHelper
 
 class SharedStateValue:
     def __init__(self, key: str, shared_state: multiprocessing.managers.SyncManager.dict, read_only: bool = False):
@@ -30,6 +39,19 @@ class SharedStateValue:
 
         return True
     
+class ModuleSharedStateFactory(SharedStateValue):
+    def __init__(self, module_name, shared_state: multiprocessing.managers.SyncManager.dict, read_only: bool = False):
+        super().__init__(module_name if "_module" in module_name else module_name + "_module", shared_state, read_only)
+        self.value: ModuleSharedState
+# class ModuleStates(SharedStateValue):
+#     def __init__(self, module_name, shared_state: multiprocessing.managers.SyncManager.dict, read_only: bool = False):
+#         super().__init__(module_name if "_module" in module_name else module_name + "_module", shared_state, read_only)
+#         self.value: ModuleStates
+#     def shutdown(self, module_name: str):
+#         self.value.shutdown(module_name)
+#     def startup(self, module_name: str):
+#         self.value.startup(module_name)
+        
 class DynamicFactory(SharedStateValue):
     def __init__(self, key: str, shared_state: multiprocessing.managers.SyncManager.dict, read_only: bool = False):
         super().__init__(key, shared_state, read_only)
@@ -92,18 +114,20 @@ class PcStatsFactory(SharedStateValue):
         super().__init__("PcStats", shared_state, read_only)
         self.value: object
 
-class HeartBeatClockFactory(SharedStateValue):
-    def __init__(self, module_or_plugin_name, shared_state: multiprocessing.managers.SyncManager.dict, read_only: bool = False):
-        super().__init__(module_or_plugin_name + "_module_heartbeat", shared_state, read_only)
-        self.value: float
-class ModulePluginActiveFactory(SharedStateValue):
-    def __init__(self, module_or_plugin_name, shared_state: multiprocessing.managers.SyncManager.dict, read_only: bool = False):
-        super().__init__(module_or_plugin_name + "_is_active", shared_state, read_only)
-        self.value: bool
+# class HeartBeatClockFactory(SharedStateValue):
+#     def __init__(self, module_or_plugin_name, shared_state: multiprocessing.managers.SyncManager.dict, read_only: bool = False):
+#         super().__init__(module_or_plugin_name + "_module_heartbeat", shared_state, read_only)
+#         self.value: float
+# class ModulePluginActiveFactory(SharedStateValue):
+#     def __init__(self, module_or_plugin_name, shared_state: multiprocessing.managers.SyncManager.dict, read_only: bool = False):
+#         super().__init__(module_or_plugin_name + "_is_active", shared_state, read_only)
+#         self.value: bool
 
 class SharedState:
     def __init__(self, manager):
         self.shared_state = manager.dict()
+        
+        self.shared_state['start_time'] = int(time.time())
 
         # Presets - not really needed but keeping just in case
         with DebugModeFlagFactory(self.shared_state) as state:
@@ -139,6 +163,4 @@ class SharedState:
         """
         Getting a value with a key in a shared state dictionary
         """
-        print(key)
-        print(self.shared_state)
         return self.shared_state[key]

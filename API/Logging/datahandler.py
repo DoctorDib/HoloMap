@@ -23,5 +23,18 @@ class LOGSDataHandler(BaseDataHandler):
         # Returning list of Log classes
         return logs
 
+    def get_latest_logs(self, limit = 500) -> SQLList:
+        return_data = super().get_sorted(Log(), "*", limit, None, "date", ascending=False, get_multiple=True)
+
+        # Formatting to List of Log
+        logs : SQLList = SQLList()
+        for data in return_data:
+            log : Log = Log()
+            log.from_sql(data)
+            logs.append(log)
+
+        # Returning list of Log classes
+        return logs
+
     def clear_logs(self):
         super().clear_table(self, Log)

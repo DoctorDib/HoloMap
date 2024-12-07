@@ -1,6 +1,5 @@
 import logging, json, os, sys
 
-from enum import Enum
 from datetime import datetime
 
 from API.Logging.sql import Log, LogType
@@ -16,17 +15,17 @@ def user_input(*args):
     add_log(log)
 
 def info(*args):
-    log_message = " ".join(str(arg) for arg in args)
+    log_message = " ".join(map(str, args))
     log = Log({"type": LogType.INFO, "message": log_message})
     add_log(log)
 
 def warning(*args):
-    log_message = " ".join(str(arg) for arg in args)
+    log_message = " ".join(map(str, args))
     log = Log({"type": LogType.WARNING, "message": log_message})
     add_log(log)
 
 def error(*args):
-    log_message = " ".join(str(arg) for arg in args)
+    log_message = " ".join(map(str, args))
     log = Log({"type": LogType.ERROR, "message": log_message})
     add_log(log)
 
@@ -35,7 +34,7 @@ def exception(*args):
     fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
     
     # Custom exception message
-    base_message = " ".join(str(arg) for arg in args)
+    base_message = " ".join(map(str, args))
     message = "[{0} - {1} (Line: {2})] => {3}".format(exc_type, fname, exc_tb.tb_lineno, base_message)
 
     log = Log({"type": LogType.ERROR, "message": message})
@@ -65,4 +64,4 @@ def get_logs():
     return json.dumps(temp_logs)
 
 def get_stored_logs():
-    return LOGSDataHandler().get_logs()
+    return LOGSDataHandler().get_latest_logs()

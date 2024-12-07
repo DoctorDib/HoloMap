@@ -9,8 +9,9 @@ import classNames from 'classnames';
 import SliderComponent from '../Inputs/Slider';
 import ButtonComponent from '../Inputs/Button';
 import Icons from '../../Common/Icons';
+import CameraComponent from './camera';
 
-interface CameraState {
+export interface CameraState {
     [key: string]: string;
 }
 
@@ -21,22 +22,11 @@ interface CameraManagerInterface {
 const CameraManagerComponent = ({ isFullScreen }: CameraManagerInterface): React.ReactElement => {
     const debugMode: boolean = useSelector((state: StateTypes): boolean => state.root.debug_mode);
 
-    const [cameraStates, setCameraStates] = useState<CameraState>({});
     const [cameraLabels, setCameraLabels] = useState<Array<string>>([]);
     const [activeCamera, setActiveCamera] = useState<any>({});
     const [shouldCapture, setShouldCapture] = useState<boolean>(false);
     const [refreshRate, setRefreshRate] = useState<number>(150);
 
-    const fetchCameraImages = async () => {
-        try {
-            const response = await axios.get(`http://${window.location.hostname}:5000/get/` + Object.keys(activeCamera).join(','));
-
-            const data = response.data;
-            setCameraStates(data);
-        } catch (error) {
-            console.error('Error fetching webcam images:', error);
-        }
-    };
 
     const fetchCameraKeys = async () => {
         try {
@@ -50,24 +40,6 @@ const CameraManagerComponent = ({ isFullScreen }: CameraManagerInterface): React
             console.error('Error fetching webcam keys:', error);
         }
     };
-
-    useEffect(() => {
-        // Update cameras
-        let intervalId: any; // Declare intervalId outside the condition
-    
-        if (debugMode && shouldCapture) {
-            intervalId = setInterval(() => {
-                fetchCameraImages();
-            }, refreshRate);
-        }
-    
-        // Clean up function to clear the interval
-        return () => {
-            if (intervalId) {
-                clearInterval(intervalId);
-            }
-        };
-    }, [cameraLabels, debugMode, shouldCapture, refreshRate]);
 
     useEffect(() => {
         let intervalId: any; // Declare intervalId outside the condition
@@ -140,12 +112,7 @@ const CameraManagerComponent = ({ isFullScreen }: CameraManagerInterface): React
                 {
                     Object.keys(activeCamera).map((key: string) => {
                         return (
-                            <div className={'image-container'}>
-                                <img src={`data:image/jpeg;base64,${cameraStates[key]}`} alt={formatName(key) + "       camera"} />
-                                <div className={'image-title'}>
-                                    {formatName(key)}
-                                </div>
-                            </div>
+                            <CameraComponent key={key} CameraName={key} Rate={refreshRate} Disabled={!shouldCapture} DisplayNameTag />
                         );
                     })
                 }
